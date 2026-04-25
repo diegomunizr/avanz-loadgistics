@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVANZ Loadgistics — Soluciones eficientes en transporte y logística</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --naranja:        #FF8C00;
+  --naranja-dark:   #D97300;
+  --naranja-light:  #FFA033;
+  --naranja-pale:   #FFF3E0;
+  --naranja-ultra:  #FFF8F0;
+  --negro:          #111111;
+  --gris-texto:     #444444;
+  --gris-medio:     #777777;
+  --gris-linea:     #E8E8E8;
+  --gris-fondo:     #F7F7F7;
+  --blanco:         #FFFFFF;
+  --exito:          #16A34A;
+  --error:          #DC2626;
+  --sombra-sm:      0 2px 8px rgba(0,0,0,0.07);
+  --sombra-md:      0 6px 24px rgba(0,0,0,0.09);
+  --sombra-lg:      0 16px 48px rgba(0,0,0,0.12);
+  --sombra-naranja: 0 8px 32px rgba(255,140,0,0.25);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Barlow',sans-serif;background:var(--blanco);color:var(--negro);overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--gris-fondo);}
+::-webkit-scrollbar-thumb{background:var(--naranja);border-radius:4px;}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:rgba(255,255,255,0.96);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--gris-linea);
+  padding:0 60px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:72px;box-shadow:0 1px 12px rgba(0,0,0,0.06);
+}
+.nav-logo{display:flex;align-items:center;gap:0;}
+.nav-wordmark{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--negro);line-height:1;}
+.nav-wordmark em{color:var(--naranja);font-style:normal;}
+.nav-sep{width:1px;height:28px;background:var(--gris-linea);margin:0 20px;}
+.nav-tagline{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gris-medio);line-height:1.3;}
+.nav-links{display:flex;align-items:center;gap:36px;list-style:none;}
+.nav-links a{color:var(--gris-texto);text-decoration:none;font-size:13px;font-weight:600;letter-spacing:.5px;transition:color .2s;position:relative;}
+.nav-links a::after{content:'';position:absolute;left:0;bottom:-4px;width:0;height:2px;background:var(--naranja);transition:width .25s;}
+.nav-links a:hover{color:var(--naranja);}
+.nav-links a:hover::after{width:100%;}
+.nav-cta-btn{background:var(--naranja)!important;color:var(--blanco)!important;padding:11px 26px;border-radius:4px;font-weight:700!important;letter-spacing:1px!important;box-shadow:var(--sombra-naranja);}
+.nav-cta-btn::after{display:none!important;}
+.nav-cta-btn:hover{background:var(--naranja-dark)!important;transform:translateY(-1px);box-shadow:0 12px 36px rgba(255,140,0,.35)!important;}
+
+/* ── HERO ── */
+.hero{min-height:100vh;padding:120px 60px 80px;display:flex;align-items:center;position:relative;overflow:hidden;background:var(--blanco);}
+.hero-stripe{position:absolute;top:0;right:0;width:46%;height:100%;background:linear-gradient(150deg,var(--naranja-ultra) 0%,var(--naranja-pale) 100%);clip-path:polygon(14% 0%,100% 0%,100% 100%,0% 100%);}
+.hero-dots{position:absolute;top:0;right:0;width:46%;height:100%;clip-path:polygon(14% 0%,100% 0%,100% 100%,0% 100%);background-image:radial-gradient(circle,rgba(255,140,0,.2) 1px,transparent 1px);background-size:28px 28px;}
+.hero-content{position:relative;z-index:2;max-width:600px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--naranja-pale);border:1px solid rgba(255,140,0,.3);color:var(--naranja-dark);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;border-radius:3px;margin-bottom:28px;}
+.hero-badge .dot{width:7px;height:7px;background:var(--naranja);border-radius:50%;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(64px,8vw,108px);line-height:.9;letter-spacing:1px;margin-bottom:26px;color:var(--negro);}
+.hero h1 .acc{color:var(--naranja);}
+.hero-sub{font-size:18px;color:var(--gris-texto);line-height:1.65;max-width:500px;margin-bottom:44px;}
+.hero-sub strong{color:var(--negro);font-weight:700;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-prim{background:var(--naranja);color:var(--blanco);padding:16px 34px;font-family:'Barlow',sans-serif;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:all .22s;box-shadow:var(--sombra-naranja);}
+.btn-prim:hover{background:var(--naranja-dark);transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,140,0,.35);}
+.btn-sec{background:var(--blanco);color:var(--negro);padding:15px 34px;font-family:'Barlow',sans-serif;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:2px solid var(--negro);border-radius:4px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:all .22s;}
+.btn-sec:hover{background:var(--negro);color:var(--blanco);transform:translateY(-2px);box-shadow:var(--sombra-md);}
+.hero-floating{position:absolute;right:80px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:16px;}
+.fstat{background:var(--blanco);border-radius:8px;padding:18px 26px;box-shadow:var(--sombra-lg);border-left:4px solid var(--naranja);min-width:180px;}
+.fstat .fn{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--naranja);line-height:1;}
+.fstat .fl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--gris-medio);margin-top:4px;}
+
+/* ── TRUST ── */
+.trust-bar{background:var(--negro);padding:18px 60px;display:flex;align-items:center;gap:40px;overflow:hidden;flex-wrap:wrap;}
+.trust-item{display:flex;align-items:center;gap:9px;color:rgba(255,255,255,.55);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;}
+.trust-item .ti{font-size:15px;}
+.trust-div{width:1px;height:18px;background:rgba(255,255,255,.12);flex-shrink:0;}
+
+/* ── SECTION ── */
+.sec{padding:100px 60px;}
+.sec-label{font-size:11px;font-weight:700;color:var(--naranja);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,5vw,64px);line-height:.95;margin-bottom:14px;color:var(--negro);}
+.sec-title em{color:var(--naranja);font-style:normal;}
+.sec-sub{color:var(--gris-medio);font-size:16px;max-width:520px;margin-bottom:56px;line-height:1.65;}
+
+/* ── SERVICIOS ── */
+.sec-servicios{background:var(--gris-fondo);}
+.servicios-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.serv-card{background:var(--blanco);border-radius:10px;padding:36px 28px;border:1px solid var(--gris-linea);transition:all .25s;position:relative;overflow:hidden;}
+.serv-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--naranja);transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+.serv-card:hover{box-shadow:var(--sombra-lg);transform:translateY(-4px);border-color:rgba(255,140,0,.2);}
+.serv-card:hover::before{transform:scaleX(1);}
+.serv-ico{width:52px;height:52px;background:var(--naranja-pale);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:20px;}
+.serv-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin-bottom:10px;letter-spacing:.5px;}
+.serv-desc{font-size:13.5px;color:var(--gris-medio);line-height:1.65;}
+
+/* ── EQUIPO ── */
+.sec-equipo{background:var(--blanco);}
+.equipos-wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+.equipo-card{border:2px solid var(--gris-linea);border-radius:10px;padding:28px 20px 24px;text-align:center;transition:all .25s;background:var(--blanco);}
+.equipo-card:hover{border-color:var(--naranja);box-shadow:0 8px 28px rgba(255,140,0,.15);transform:translateY(-3px);}
+.eq-num{font-family:'Bebas Neue',sans-serif;font-size:52px;color:rgba(255,140,0,.15);line-height:1;margin-bottom:8px;}
+.eq-name{font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;color:var(--negro);}
+.eq-tag{display:inline-block;background:var(--naranja-pale);color:var(--naranja-dark);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:10px;}
+.eq-sub{font-size:12px;color:var(--gris-medio);line-height:1.5;}
+
+/* ── BENEFICIOS ── */
+.sec-beneficios{background:var(--negro);color:var(--blanco);}
+.sec-beneficios .sec-title{color:var(--blanco);}
+.sec-beneficios .sec-sub{color:rgba(255,255,255,.5);}
+.ben-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.ben-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:32px;transition:all .25s;}
+.ben-card:hover{background:rgba(255,140,0,.07);border-color:rgba(255,140,0,.25);transform:translateY(-3px);}
+.ben-ico{width:48px;height:48px;background:rgba(255,140,0,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px;}
+.ben-title{font-weight:700;font-size:16px;margin-bottom:8px;color:var(--blanco);}
+.ben-desc{font-size:13.5px;color:rgba(255,255,255,.45);line-height:1.65;}
+
+/* ── PORTALES ── */
+.sec-portales{background:var(--gris-fondo);}
+.portales-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+.portal-card{border-radius:12px;overflow:hidden;border:1px solid var(--gris-linea);box-shadow:var(--sombra-sm);transition:all .25s;background:var(--blanco);}
+.portal-card:hover{box-shadow:var(--sombra-lg);border-color:rgba(255,140,0,.25);}
+.portal-head{padding:28px 32px;display:flex;align-items:center;gap:16px;}
+.portal-head.orange{background:var(--naranja);}
+.portal-head.dark{background:var(--negro);}
+.ph-icon{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.ph-text h3{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--blanco);line-height:1;}
+.ph-text p{font-size:12px;color:rgba(255,255,255,.7);margin-top:3px;font-weight:500;}
+.portal-body{background:var(--blanco);padding:24px 32px 28px;}
+.portal-btn-row{display:flex;flex-direction:column;gap:12px;}
+.prt-btn{width:100%;background:var(--gris-fondo);border:1.5px solid var(--gris-linea);color:var(--negro);padding:16px 20px;border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:14px;transition:all .2s;}
+.prt-btn:hover{background:var(--naranja-pale);border-color:var(--naranja);color:var(--naranja-dark);}
+.prt-ico{font-size:20px;flex-shrink:0;}
+.prt-meta strong{display:block;font-size:14px;font-weight:700;}
+.prt-meta span{display:block;font-size:12px;color:var(--gris-medio);font-weight:400;margin-top:2px;}
+.prt-btn:hover .prt-meta span{color:rgba(255,140,0,.7);}
+.prt-arrow{margin-left:auto;font-size:16px;color:var(--gris-medio);transition:transform .2s;}
+.prt-btn:hover .prt-arrow{transform:translateX(4px);color:var(--naranja);}
+
+/* ── CTA ── */
+.sec-cta{background:linear-gradient(135deg,var(--naranja) 0%,var(--naranja-dark) 100%);padding:80px 60px;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.cta-text h2{font-family:'Bebas Neue',sans-serif;font-size:56px;color:var(--blanco);letter-spacing:1px;line-height:1;margin-bottom:10px;}
+.cta-text p{font-size:16px;color:rgba(255,255,255,.8);max-width:500px;line-height:1.6;}
+.cta-cards{display:flex;gap:20px;flex-shrink:0;flex-wrap:wrap;}
+.cta-card{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:24px 28px;min-width:210px;transition:background .2s;}
+.cta-card:hover{background:rgba(255,255,255,.25);}
+.cta-card-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:10px;}
+.cta-card-icon{font-size:22px;margin-bottom:8px;}
+.cta-card-num{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--blanco);letter-spacing:1px;line-height:1;}
+.cta-card a{display:block;font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--blanco);text-decoration:none;letter-spacing:1px;line-height:1;transition:opacity .2s;}
+.cta-card a:hover{opacity:.8;}
+
+/* ── ADMIN ── */
+.sec-admin{background:var(--gris-fondo);}
+.admin-notice{display:flex;align-items:center;gap:12px;background:var(--naranja-pale);border:1px solid rgba(255,140,0,.25);border-radius:8px;padding:14px 20px;font-size:13px;color:var(--gris-texto);margin-bottom:32px;}
+.admin-tabs{display:flex;gap:4px;margin-bottom:32px;background:var(--blanco);border:1px solid var(--gris-linea);border-radius:8px;padding:4px;width:fit-content;}
+.atab{padding:10px 22px;background:transparent;border:none;color:var(--gris-medio);font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:all .2s;}
+.atab.active{background:var(--naranja);color:var(--blanco);box-shadow:var(--sombra-naranja);}
+.apanel{display:none;}
+.apanel.active{display:block;}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--blanco);border-radius:10px;overflow:hidden;box-shadow:var(--sombra-sm);}
+.data-table th{background:var(--negro);color:rgba(255,255,255,.7);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:13px 18px;text-align:left;}
+.data-table td{padding:14px 18px;border-bottom:1px solid var(--gris-linea);color:var(--gris-texto);vertical-align:top;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:var(--naranja-ultra);}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+.badge-pend{background:rgba(255,140,0,.12);color:var(--naranja-dark);}
+.empty-state{background:var(--blanco);border-radius:10px;text-align:center;padding:60px 20px;border:1px solid var(--gris-linea);color:var(--gris-medio);}
+.empty-state .ei{font-size:48px;margin-bottom:14px;}
+.empty-state p{font-size:14px;}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal{background:var(--blanco);border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.2);animation:mUp .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes mUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.modal-head{background:var(--naranja);padding:22px 28px;display:flex;align-items:center;justify-content:space-between;border-radius:13px 13px 0 0;}
+.modal-head h2{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--blanco);letter-spacing:1px;}
+.mclose{background:rgba(255,255,255,.2);border:none;color:var(--blanco);width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.mclose:hover{background:rgba(255,255,255,.35);}
+.modal-body{padding:28px;}
+.fgrp{margin-bottom:18px;}
+.fgrp label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--gris-medio);margin-bottom:7px;}
+.fgrp input,.fgrp select,.fgrp textarea{width:100%;background:var(--gris-fondo);border:1.5px solid var(--gris-linea);color:var(--negro);padding:13px 16px;border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;transition:all .2s;outline:none;}
+.fgrp input:focus,.fgrp select:focus,.fgrp textarea:focus{border-color:var(--naranja);background:var(--naranja-ultra);}
+.fgrp select option{background:var(--blanco);}
+.fgrp textarea{resize:vertical;min-height:85px;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.file-drop{border:2px dashed var(--gris-linea);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.file-drop:hover,.file-drop.over{border-color:var(--naranja);background:var(--naranja-ultra);}
+.file-drop input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.fd-icon{font-size:34px;margin-bottom:10px;}
+.fd-label{font-size:13px;color:var(--gris-medio);}
+.fd-label span{color:var(--naranja);font-weight:700;}
+.flist{margin-top:10px;text-align:left;}
+.fitem{font-size:12px;color:var(--naranja-dark);padding:4px 0;border-bottom:1px solid var(--gris-linea);}
+.btn-submit{width:100%;background:var(--naranja);color:var(--blanco);padding:16px;border:none;border-radius:8px;font-family:'Barlow',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:all .2s;box-shadow:var(--sombra-naranja);}
+.btn-submit:hover{background:var(--naranja-dark);transform:translateY(-1px);box-shadow:0 10px 30px rgba(255,140,0,.35);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:30px;right:30px;background:var(--blanco);border:1px solid var(--gris-linea);border-left:4px solid var(--exito);color:var(--negro);padding:16px 22px;border-radius:10px;z-index:3000;font-size:13px;box-shadow:var(--sombra-lg);transform:translateX(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:320px;}
+.toast.show{transform:translateX(0);}
+.t-title{font-weight:800;font-size:15px;margin-bottom:3px;color:var(--negro);}
+.t-msg{color:var(--gris-medio);}
+
+/* ── FOOTER ── */
+footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
+.footer-top{display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px;}
+.fbrand p{font-size:13.5px;color:rgba(255,255,255,.4);line-height:1.7;margin-top:14px;max-width:300px;}
+.f-contact{margin-top:22px;display:flex;flex-direction:column;gap:8px;}
+.f-citem{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.45);}
+.f-citem a{color:var(--gris-medio);text-decoration:none;}
+.f-citem a:hover{color:var(--naranja);}
+.f-citem a:hover{text-decoration:underline;}
+.fcol h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--naranja);margin-bottom:18px;}
+.fcol ul{list-style:none;}
+.fcol ul li{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:10px;cursor:pointer;transition:color .2s;}
+.fcol ul li:hover{color:var(--naranja);}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.07);padding-top:24px;font-size:12px;color:rgba(255,255,255,.2);}
+
+@media(max-width:1100px){.hero-floating{display:none;}.hero-stripe,.hero-dots{width:40%;}}
+@media(max-width:900px){
+  nav{padding:0 24px;} .hero{padding:110px 24px 60px;}
+  .hero-stripe,.hero-dots{display:none;} .sec{padding:70px 24px;}
+  .trust-bar{padding:20px 24px;gap:24px;} .servicios-grid{grid-template-columns:1fr 1fr;}
+  .equipos-wrap{grid-template-columns:repeat(3,1fr);} .ben-grid{grid-template-columns:1fr 1fr;}
+  .portales-grid{grid-template-columns:1fr;} .sec-cta{padding:60px 24px;} .cta-text h2{font-size:40px;}
+  .footer-top{grid-template-columns:1fr;gap:28px;} .footer-bottom{flex-direction:column;gap:10px;text-align:center;}
+  .nav-links{display:none;} .frow{grid-template-columns:1;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-wordmark"><em>AVANZ</em> LOADGISTICS</div>
+    <div class="nav-sep"></div>
+    <div class="nav-tagline">Transporte &amp;<br>Logística Nacional</div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#equipo">Equipo</a></li>
+    <li><a href="#beneficios">Beneficios</a></li>
+    <li><a href="#portales">Portales</a></li>
+    <li><a href="#admin">Admin</a></li>
+    <li><a href="#portales" class="nav-cta-btn">Solicitar servicio</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-stripe"></div>
+  <div class="hero-dots"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="dot"></span>Empresa 100% Mexicana</div>
+    <h1>MOVER<br>MÉXICO<br><span class="acc">ES LO<br>NUESTRO.</span></h1>
+    <p class="hero-sub">Gestión y coordinación de transporte de carga terrestre <strong>FTL a nivel nacional</strong>. Red de transportistas validados, seguimiento puntual y atención personalizada en cada embarque.</p>
+    <div class="hero-btns">
+      <a href="#portales" class="btn-prim">🚚 Solicitar transporte</a>
+      <a href="#portales" class="btn-sec">📋 Registrarme</a>
+    </div>
+  </div>
+  <div class="hero-floating">
+    <div class="fstat"><div class="fn">FTL</div><div class="fl">Carga completa</div></div>
+    <div class="fstat"><div class="fn">5</div><div class="fl">Tipos de equipo</div></div>
+    <div class="fstat"><div class="fn">MX</div><div class="fl">Cobertura nacional</div></div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item"><span class="ti">✅</span> Transportistas certificados</div>
+  <div class="trust-div"></div>
+  <div class="trust-item"><span class="ti">📡</span> Seguimiento en tiempo real</div>
+  <div class="trust-div"></div>
+  <div class="trust-item"><span class="ti">⚡</span> Respuesta rápida</div>
+  <div class="trust-div"></div>
+  <div class="trust-item"><span class="ti">⏱️</span> Entregas puntuales</div>
+  <div class="trust-div"></div>
+  <div class="trust-item"><span class="ti">🇲🇽</span> Empresa 100% mexicana</div>
+</div>
+
+<!-- SERVICIOS -->
+<section class="sec sec-servicios" id="servicios">
+  <div class="sec-label">Lo que hacemos</div>
+  <div class="sec-title">NUESTROS <em>SERVICIOS</em></div>
+  <div class="sec-sub">Soluciones logísticas diseñadas para mover tu negocio con eficiencia, puntualidad y total visibilidad.</div>
+  <div class="servicios-grid">
+    <div class="serv-card"><div class="serv-ico">🏭</div><div class="serv-name">FTL — Carga Completa</div><div class="serv-desc">Camión dedicado exclusivamente para tu carga. Ideal para embarques de gran volumen que requieren toda la capacidad del equipo.</div></div>
+    <div class="serv-card"><div class="serv-ico">📦</div><div class="serv-name">LTL — Carga Consolidada</div><div class="serv-desc">Comparte espacio con otros cargamentos y reduce costos sin comprometer la eficiencia ni los tiempos de entrega.</div></div>
+    <div class="serv-card"><div class="serv-ico">🗺️</div><div class="serv-name">Rutas Nacionales</div><div class="serv-desc">Cobertura en toda la República Mexicana con rutas optimizadas, tiempos garantizados y operadores confiables.</div></div>
+    <div class="serv-card"><div class="serv-ico">🤝</div><div class="serv-name">Servicios Dedicados</div><div class="serv-desc">Atención personalizada con asignación de unidades y operadores exclusivos adaptados a tu empresa.</div></div>
+  </div>
+</section>
+
+<!-- EQUIPO -->
+<section class="sec sec-equipo" id="equipo">
+  <div class="sec-label">Flota disponible</div>
+  <div class="sec-title">TIPOS DE <em>EQUIPO</em></div>
+  <div class="sec-sub">La unidad correcta para cada tipo de carga. Flota amplia y verificada para cualquier necesidad.</div>
+  <div class="equipos-wrap">
+    <div class="equipo-card"><div class="eq-num">01</div><div class="eq-name">Tractocamión</div><div class="eq-tag">Multiconfiguración</div><div class="eq-sub">Caja seca · Plataforma<br>Refrigerado · Portacontenedores</div></div>
+    <div class="equipo-card"><div class="eq-num">02</div><div class="eq-name">Full</div><div class="eq-tag">Doble remolque</div><div class="eq-sub">Máxima capacidad para rutas de largo recorrido</div></div>
+    <div class="equipo-card"><div class="eq-num">03</div><div class="eq-name">Torton</div><div class="eq-tag">Regional</div><div class="eq-sub">Versatilidad para distribución urbana y regional</div></div>
+    <div class="equipo-card"><div class="eq-num">04</div><div class="eq-name">Rabón</div><div class="eq-tag">Distribución Local</div><div class="eq-sub">Entregas en zonas de difícil acceso y centros urbanos</div></div>
+    <div class="equipo-card"><div class="eq-num">05</div><div class="eq-name">Camioneta</div><div class="eq-tag">Última milla</div><div class="eq-sub">Cargas pequeñas y entregas express en ciudad</div></div>
+    <div class="equipo-card"><div class="eq-num">06</div><div class="eq-name">Transporte de Personal</div><div class="eq-tag">Nacional</div><div class="eq-sub">De 1 - 50 pasajeros</div></div>
+  </div>
+</section>
+
+<!-- BENEFICIOS -->
+<section class="sec sec-beneficios" id="beneficios">
+  <div class="sec-label">¿Por qué AVANZ?</div>
+  <div class="sec-title">BENEFICIOS PARA<br><em>EL CLIENTE</em></div>
+  <div class="sec-sub">Nos convertimos en el aliado estratégico que tu cadena de suministro necesita.</div>
+  <div class="ben-grid">
+    <div class="ben-card"><div class="ben-ico">💰</div><div class="ben-title">Reducción de costos</div><div class="ben-desc">Optimización de tarifas y negociación directa con transportistas para maximizar el ahorro en cada operación.</div></div>
+    <div class="ben-card"><div class="ben-ico">⏱️</div><div class="ben-title">Cumplimiento garantizado</div><div class="ben-desc">Puntualidad y confiabilidad en cada envío. Tu cliente no espera, nosotros tampoco.</div></div>
+    <div class="ben-card"><div class="ben-ico">📡</div><div class="ben-title">Visibilidad total</div><div class="ben-desc">Seguimiento continuo del estatus de cada operación. Siempre sabes dónde está tu carga.</div></div>
+    <div class="ben-card"><div class="ben-ico">🎯</div><div class="ben-title">Atención personalizada</div><div class="ben-desc">Respuesta ágil y comunicación directa. Siempre una persona real atendiendo tu cuenta.</div></div>
+    <div class="ben-card"><div class="ben-ico">⚡</div><div class="ben-title">Flexibilidad operativa</div><div class="ben-desc">Nos adaptamos a cambios en volumen y requerimientos sin burocracia ni complicaciones.</div></div>
+    <div class="ben-card"><div class="ben-ico">🔒</div><div class="ben-title">Seguridad en cada viaje</div><div class="ben-desc">Transportistas validados y control operativo para proteger tu carga en todo momento.</div></div>
+  </div>
+</section>
+
+<!-- PORTALES -->
+<section class="sec sec-portales" id="portales">
+  <div class="sec-label">Acceso directo</div>
+  <div class="sec-title">PORTALES DE <em>ACCESO</em></div>
+  <div class="sec-sub">¿Eres proveedor de transporte o cliente? Regístrate o realiza tus solicitudes directamente aquí.</div>
+  <div class="portales-grid">
+    <div class="portal-card">
+      <div class="portal-head orange">
+        <div class="ph-icon">🚚</div>
+        <div class="ph-text"><h3>PORTAL PROVEEDORES</h3><p>Transportistas y operadores logísticos</p></div>
+      </div>
+      <div class="portal-body">
+        <div class="portal-btn-row">
+          <button class="prt-btn" onclick="openModal('alta-proveedor')">
+            <span class="prt-ico">📋</span>
+            <span class="prt-meta"><strong>Darme de alta como proveedor</strong><span>Registro con documentación requerida</span></span>
+            <span class="prt-arrow">→</span>
+          </button>
+          <button class="prt-btn" onclick="openModal('solicitud-viaje-proveedor')">
+            <span class="prt-ico">🗺️</span>
+            <span class="prt-meta"><strong>Ofertar disponibilidad de unidad</strong><span>Proponer viaje o carga disponible</span></span>
+            <span class="prt-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="portal-card">
+      <div class="portal-head dark">
+        <div class="ph-icon">🏢</div>
+        <div class="ph-text"><h3>PORTAL CLIENTES</h3><p>Empresas que necesitan mover carga</p></div>
+      </div>
+      <div class="portal-body">
+        <div class="portal-btn-row">
+          <button class="prt-btn" onclick="openModal('alta-cliente')">
+            <span class="prt-ico">✅</span>
+            <span class="prt-meta"><strong>Registrarme como cliente</strong><span>Cuenta nueva para solicitar servicios</span></span>
+            <span class="prt-arrow">→</span>
+          </button>
+          <button class="prt-btn" onclick="openModal('solicitud-transporte')">
+            <span class="prt-ico">📦</span>
+            <span class="prt-meta"><strong>Solicitar transporte</strong><span>Cotización y asignación de unidad</span></span>
+            <span class="prt-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="sec-cta">
+  <div class="cta-text">
+    <h2>¿LISTO PARA<br>AVANZAR?</h2>
+    <p>Contáctanos directamente. Tenemos una línea dedicada para proveedores y otra para clientes — respuesta en menos de 2 horas.</p>
+  </div>
+  <div class="cta-cards">
+    <div class="cta-card">
+      <div class="cta-card-label">Proveedores</div>
+      <a href="tel:8119644824">811-964-4824</a>
+    </div>
+    <div class="cta-card">
+      <div class="cta-card-label">Clientes</div>
+      <a href="tel:8110159561">811-015-9561</a>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<section class="sec sec-admin" id="admin">
+  <div class="sec-label">Panel interno</div>
+  <div class="sec-title">ADMINISTRACIÓN</div>
+  <div class="admin-notice">⚠️ <span>Área interna de AVANZ Loadgistics — Seguimiento de registros y solicitudes recibidas.</span></div>
+  <div class="admin-tabs">
+    <button class="atab active" onclick="switchTab('proveedores',this)">Proveedores</button>
+    <button class="atab" onclick="switchTab('clientes',this)">Clientes</button>
+    <button class="atab" onclick="switchTab('viajes-prov',this)">Solicitudes Proveedor</button>
+    <button class="atab" onclick="switchTab('sol-transporte',this)">Solicitudes Cliente</button>
+  </div>
+  <div id="ap-proveedores" class="apanel active"><div id="tbl-proveedores"></div></div>
+  <div id="ap-clientes" class="apanel"><div id="tbl-clientes"></div></div>
+  <div id="ap-viajes-prov" class="apanel"><div id="tbl-viajes-prov"></div></div>
+  <div id="ap-sol-transporte" class="apanel"><div id="tbl-sol-transporte"></div></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="fbrand">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:#FF8C00;">AVANZ <span style="color:#fff;">LOADGISTICS</span></div>
+      <p>Empresa 100% mexicana especializada en gestión y coordinación de transporte de carga terrestre a nivel nacional. Soluciones logísticas eficientes adaptadas a cada cliente.</p>
+      <div class="f-contact">
+        <div class="fcol"><h4>Contacto</h4><div class="f-citem">
+          <a href="mailto:ventas@avanz.com.mx">ventas@avanz.com.mx</a></div>
+          <br>
+      </div>
+    </div>
+    <div class="fcol"><h4>Servicios</h4><ul><li>FTL — Carga Completa</li><li>LTL — Consolidada</li><li>Rutas Nacionales</li><li>Servicios Dedicados</li></ul></div>
+    <div class="fcol"><h4>Equipo</h4><ul><li>Tractocamión</li><li>Full — Doble remolque</li><li>Torton</li><li>Rabón</li><li>Camionetas</li></ul></div>
+    <div class="fcol"><h4>Acceso</h4><ul><li onclick="openModal('alta-proveedor')">Alta Proveedor</li><li onclick="openModal('solicitud-viaje-proveedor')">Ofertar Viaje</li><li onclick="openModal('alta-cliente')">Alta Cliente</li><li onclick="openModal('solicitud-transporte')">Solicitar Transporte</li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 AVANZ Loadgistics. Todos los derechos reservados.</span>
+    <span>Monterrey, Nuevo León, México</span>
+  </div>
+</footer>
+
+<!-- MODAL: Alta Proveedor -->
+<div class="modal-overlay" id="modal-alta-proveedor">
+  <div class="modal">
+    <div class="modal-head"><h2>🚚 Alta de Proveedor</h2><button class="mclose" onclick="closeModal('alta-proveedor')">✕</button></div>
+    <div class="modal-body">
+      <div style="background:var(--naranja-pale);border:1px solid rgba(255,140,0,.3);border-radius:10px;padding:18px 20px;margin-bottom:22px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--naranja-dark);margin-bottom:12px;">📋 Documentos requeridos para el alta</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px;">
+          <li style="font-size:13px;color:var(--gris-texto);display:flex;align-items:flex-start;gap:8px;"><span style="color:var(--naranja);font-weight:700;flex-shrink:0;">✓</span>Constancia de situación fiscal actualizada</li>
+          <li style="font-size:13px;color:var(--gris-texto);display:flex;align-items:flex-start;gap:8px;"><span style="color:var(--naranja);font-weight:700;flex-shrink:0;">✓</span>INE por ambos lados del representante legal o dueño (Persona Física)</li>
+          <li style="font-size:13px;color:var(--gris-texto);display:flex;align-items:flex-start;gap:8px;"><span style="color:var(--naranja);font-weight:700;flex-shrink:0;">✓</span>Opinión de cumplimiento positiva actualizada</li>
+          <li style="font-size:13px;color:var(--gris-texto);display:flex;align-items:flex-start;gap:8px;"><span style="color:var(--naranja);font-weight:700;flex-shrink:0;">✓</span>Carátula bancaria de la cuenta de pagos actualizada</li>
+          <li style="font-size:13px;color:var(--gris-texto);display:flex;align-items:flex-start;gap:8px;"><span style="color:var(--naranja);font-weight:700;flex-shrink:0;">✓</span>Comprobante de domicilio</li>
+          <li style="font-size:13px;color:var(--gris-texto);display:flex;align-items:flex-start;gap:8px;"><span style="color:var(--naranja);font-weight:700;flex-shrink:0;">✓</span>Póliza de seguro de tractos y remolques disponibles para carga</li>
+          <li style="font-size:13px;color:var(--gris-texto);display:flex;align-items:flex-start;gap:8px;"><span style="color:var(--naranja);font-weight:700;flex-shrink:0;">✓</span>Permisos físico-mecánicos de tractos y remolques disponibles para carga</li>
+          <li style="font-size:13px;color:var(--gris-texto);display:flex;align-items:flex-start;gap:8px;"><span style="color:var(--naranja);font-weight:700;flex-shrink:0;">✓</span>Tarjetas de circulación de tractos y remolques disponibles para carga</li>
+          <li style="font-size:13px;color:var(--gris-texto);display:flex;align-items:flex-start;gap:8px;"><span style="color:var(--naranja);font-weight:700;flex-shrink:0;">✓</span>Certificado de bajas emisiones de tractos disponibles para carga</li>
+        </ul>
+      </div>
+      <form onsubmit="submitForm(event,'alta-proveedor')">
+        <div class="frow">
+          <div class="fgrp"><label>Nombre / Razón Social *</label><input type="text" name="nombre" required placeholder="Transportes García S.A."></div>
+          <div class="fgrp"><label>RFC *</label><input type="text" name="rfc" required placeholder="GARG800101AAA"></div>
+        </div>
+        <div class="frow">
+          <div class="fgrp"><label>Contacto *</label><input type="text" name="contacto" required placeholder="Juan García"></div>
+          <div class="fgrp"><label>Teléfono *</label><input type="tel" name="telefono" required placeholder="81 0000 0000"></div>
+        </div>
+        <div class="fgrp"><label>Correo electrónico *</label><input type="email" name="email" required placeholder="contacto@empresa.com"></div>
+        <div class="fgrp"><label>Tipo de equipo *</label>
+          <select name="tipo_equipo" required><option value="">Selecciona...</option><option>Tractocamión — Caja seca</option><option>Tractocamión — Plataforma</option><option>Tractocamión — Refrigerado</option><option>Tractocamión — Portacontenedores</option><option>Full (doble remolque)</option><option>Torton</option><option>Rabón</option><option>Camioneta</option><option>Varios tipos</option></select>
+        </div>
+        <div class="frow">
+          <div class="fgrp"><label>Número de unidades</label><input type="number" name="num_unidades" min="1" placeholder="Ej. 5"></div>
+          <div class="fgrp"><label>Rutas de operación</label><input type="text" name="rutas" placeholder="MTY — CDMX — GDL"></div>
+        </div>
+        <div class="fgrp"><label>Subir documentos requeridos *</label>
+          <div class="file-drop" id="fdrop-prov">
+            <input type="file" multiple accept=".pdf,.jpg,.png,.jpeg" onchange="handleFiles(this,'prov')">
+            <div class="fd-icon">📎</div>
+            <div class="fd-label">Arrastra tus archivos o <span>selecciona aquí</span></div>
+            <div class="flist" id="flist-prov"></div>
+          </div>
+        </div>
+        <div class="fgrp"><label>Comentarios adicionales</label><textarea name="comentarios" placeholder="Zonas de operación, servicios especiales, disponibilidad..."></textarea></div>
+        <button type="submit" class="btn-submit">Enviar solicitud de alta</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Solicitud viaje proveedor -->
+<div class="modal-overlay" id="modal-solicitud-viaje-proveedor">
+  <div class="modal">
+    <div class="modal-head"><h2>🗺️ Ofertar Disponibilidad</h2><button class="mclose" onclick="closeModal('solicitud-viaje-proveedor')">✕</button></div>
+    <div class="modal-body">
+      <form onsubmit="submitForm(event,'solicitud-viaje-proveedor')">
+        <div class="frow">
+          <div class="fgrp"><label>Tu empresa / Nombre *</label><input type="text" name="proveedor" required placeholder="Transportes García"></div>
+          <div class="fgrp"><label>Teléfono *</label><input type="tel" name="telefono" required placeholder="81 0000 0000"></div>
+        </div>
+        <div class="fgrp"><label>Correo electrónico *</label><input type="email" name="email" required placeholder="contacto@empresa.com"></div>
+        <div class="fgrp"><label>Tipo de unidad disponible *</label>
+          <select name="tipo_unidad" required><option value="">Selecciona...</option><option>Tractocamión — Caja seca</option><option>Tractocamión — Plataforma</option><option>Tractocamión — Refrigerado</option><option>Tractocamión — Portacontenedores</option><option>Full (doble remolque)</option><option>Torton</option><option>Rabón</option><option>Camioneta</option></select>
+        </div>
+        <div class="frow">
+          <div class="fgrp"><label>Ciudad de origen *</label><input type="text" name="origen" required placeholder="Monterrey, NL"></div>
+          <div class="fgrp"><label>Ciudad destino *</label><input type="text" name="destino" required placeholder="CDMX"></div>
+        </div>
+        <div class="frow">
+          <div class="fgrp"><label>Fecha disponible *</label><input type="date" name="fecha" required></div>
+          <div class="fgrp"><label>Tarifa propuesta (MXN)</label><input type="number" name="tarifa" placeholder="Ej. 12000"></div>
+        </div>
+        <div class="fgrp"><label>Observaciones</label><textarea name="observaciones" placeholder="Tipo de carga que aceptas, restricciones, disponibilidad de días..."></textarea></div>
+        <button type="submit" class="btn-submit">Enviar disponibilidad</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Alta cliente -->
+<div class="modal-overlay" id="modal-alta-cliente">
+  <div class="modal">
+    <div class="modal-head"><h2>🏢 Alta de Cliente</h2><button class="mclose" onclick="closeModal('alta-cliente')">✕</button></div>
+    <div class="modal-body">
+      <form onsubmit="submitForm(event,'alta-cliente')">
+        <div class="frow">
+          <div class="fgrp"><label>Razón Social / Nombre *</label><input type="text" name="empresa" required placeholder="Mi Empresa S.A. de C.V."></div>
+          <div class="fgrp"><label>RFC</label><input type="text" name="rfc" placeholder="MIEM900101XXX"></div>
+        </div>
+        <div class="frow">
+          <div class="fgrp"><label>Contacto *</label><input type="text" name="contacto" required placeholder="María López"></div>
+          <div class="fgrp"><label>Puesto</label><input type="text" name="puesto" placeholder="Gerente de Logística"></div>
+        </div>
+        <div class="frow">
+          <div class="fgrp"><label>Teléfono *</label><input type="tel" name="telefono" required placeholder="81 0000 0000"></div>
+          <div class="fgrp"><label>Correo *</label><input type="email" name="email" required placeholder="logistica@miempresa.com"></div>
+        </div>
+        <div class="fgrp"><label>Giro o industria</label>
+          <select name="giro"><option value="">Selecciona...</option><option>Manufactura</option><option>Retail / Comercio</option><option>Alimentos y bebidas</option><option>Farmacéutica</option><option>Automotriz</option><option>Construcción</option><option>Importación / Exportación</option><option>Otro</option></select>
+        </div>
+        <div class="fgrp"><label>Volumen estimado mensual</label>
+          <select name="volumen"><option value="">Selecciona...</option><option>1 — 5 viajes/mes</option><option>6 — 15 viajes/mes</option><option>16 — 30 viajes/mes</option><option>Más de 30 viajes/mes</option></select>
+        </div>
+        <div class="fgrp"><label>Rutas frecuentes</label><input type="text" name="rutas" placeholder="Ej. MTY a CDMX, MTY a GDL"></div>
+        <div class="fgrp"><label>¿Cómo nos conociste?</label>
+          <select name="referido"><option value="">Selecciona...</option><option>Recomendación</option><option>Redes sociales</option><option>Búsqueda en internet</option><option>Ferias o eventos</option><option>Visita comercial</option></select>
+        </div>
+        <div class="fgrp"><label>Comentarios</label><textarea name="comentarios" placeholder="Necesidades especiales, tipos de carga, condiciones de pago..."></textarea></div>
+        <button type="submit" class="btn-submit">Registrar cuenta de cliente</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Solicitud transporte -->
+<div class="modal-overlay" id="modal-solicitud-transporte">
+  <div class="modal">
+    <div class="modal-head"><h2>📦 Solicitar Transporte</h2><button class="mclose" onclick="closeModal('solicitud-transporte')">✕</button></div>
+    <div class="modal-body">
+      <form onsubmit="submitForm(event,'solicitud-transporte')">
+        <div class="frow">
+          <div class="fgrp"><label>Tu empresa *</label><input type="text" name="empresa" required placeholder="Mi Empresa S.A."></div>
+          <div class="fgrp"><label>Tu nombre *</label><input type="text" name="contacto" required placeholder="María López"></div>
+        </div>
+        <div class="frow">
+          <div class="fgrp"><label>Teléfono *</label><input type="tel" name="telefono" required placeholder="81 0000 0000"></div>
+          <div class="fgrp"><label>Correo *</label><input type="email" name="email" required placeholder="logistica@empresa.com"></div>
+        </div>
+        <div class="frow">
+          <div class="fgrp"><label>Ciudad de origen *</label><input type="text" name="origen" required placeholder="Monterrey, NL"></div>
+          <div class="fgrp"><label>Ciudad destino *</label><input type="text" name="destino" required placeholder="CDMX"></div>
+        </div>
+        <div class="fgrp"><label>Link de ubicación — Origen</label><input type="url" name="link_origen" placeholder="https://maps.google.com/..."></div>
+        <div class="fgrp"><label>Link de ubicación — Destino</label><input type="url" name="link_destino" placeholder="https://maps.google.com/..."></div>
+        <div class="frow">
+          <div class="fgrp"><label>Fecha de carga *</label><input type="date" name="fecha_carga" required></div>
+          <div class="fgrp"><label>Tipo de equipo *</label>
+            <select name="tipo_equipo" required><option value="">Selecciona...</option><option>Tractocamión — Caja seca</option><option>Tractocamión — Plataforma</option><option>Tractocamión — Refrigerado</option><option>Tractocamión — Portacontenedores</option><option>Full (doble remolque)</option><option>Torton</option><option>Rabón</option><option>Camioneta</option></select>
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fgrp"><label>Hora de carga *</label><input type="time" name="hora_carga" required></div>
+          <div class="fgrp"><label>Hora de descarga</label><input type="time" name="hora_descarga"></div>
+        </div>
+        <div class="frow">
+          <div class="fgrp"><label>Descripción de la carga *</label><input type="text" name="descripcion_carga" required placeholder="Electrodomésticos en cajas"></div>
+          <div class="fgrp"><label>Peso aproximado (kg)</label><input type="number" name="peso_kg" placeholder="Ej. 20000"></div>
+        </div>
+        <div class="fgrp"><label>Tipo de servicio</label>
+          <select name="servicio"><option value="">Selecciona...</option><option>FTL — Carga completa</option><option>LTL — Carga consolidada</option><option>Servicio dedicado</option></select>
+        </div>
+        <div class="fgrp"><label>Observaciones especiales</label><textarea name="observaciones" placeholder="Carga frágil, temperatura controlada, horarios de carga/descarga..."></textarea></div>
+        <button type="submit" class="btn-submit">Enviar solicitud de transporte</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="t-title" id="t-title">¡Solicitud recibida!</div>
+  <div class="t-msg" id="t-msg">Nos pondremos en contacto contigo pronto.</div>
+</div>
+
+<script>
+const SHEETS_URL='https://script.google.com/macros/s/AKfycbzTC9YmJpo63z0E0aj5waSEpw1KrtD4tIziL6KIqvnyO3KXmKHT-8G9XmMIpfxgZrsd/exec';
+const TIPO_MAP={'alta-proveedor':'proveedores','solicitud-viaje-proveedor':'viajes_prov','alta-cliente':'clientes','solicitud-transporte':'sol_transporte'};
+const DBKEYS={'alta-proveedor':'avanz_proveedores','solicitud-viaje-proveedor':'avanz_viajes_prov','alta-cliente':'avanz_clientes','solicitud-transporte':'avanz_sol_transporte'};
+const getDB=k=>{try{return JSON.parse(localStorage.getItem(k)||'[]');}catch{return[];}};
+const saveDB=(k,d)=>localStorage.setItem(k,JSON.stringify(d));
+
+function openModal(id){document.getElementById('modal-'+id).classList.add('active');document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');document.body.style.overflow='';}
+document.querySelectorAll('.modal-overlay').forEach(el=>{el.addEventListener('click',function(e){if(e.target===this){this.classList.remove('active');document.body.style.overflow='';}});});
+
+function handleFiles(input,area){const list=document.getElementById('flist-'+area);if(!list)return;list.innerHTML='';Array.from(input.files).forEach(f=>{const d=document.createElement('div');d.className='fitem';d.textContent='📄 '+f.name;list.appendChild(d);});}
+
+function submitForm(e,formId){
+  e.preventDefault();
+  const form=e.target;const btn=form.querySelector('.btn-submit');
+  btn.disabled=true;btn.textContent='Enviando...';
+
+  const fd=new FormData(form);
+  const obj={_tipo:TIPO_MAP[formId],fecha:new Date().toLocaleString('es-MX'),estatus:'Pendiente'};
+  fd.forEach((v,k)=>{ if(!(v instanceof File)) obj[k]=v; });
+
+  const fileInput=form.querySelector('input[type="file"]');
+  const archivos=fileInput && fileInput.files.length>0 ? Array.from(fileInput.files) : [];
+
+  function enviar(archivosB64){
+    if(archivosB64.length>0) obj._archivos=JSON.stringify(archivosB64);
+
+    // Guardar local
+    const localObj=Object.assign({},obj);
+    delete localObj._tipo;delete localObj._archivos;
+    const key=DBKEYS[formId];const db=getDB(key);db.push(localObj);saveDB(key,db);
+
+    // Enviar a Google Sheets via iframe (evita bloqueo CORS de no-cors)
+    const iframe=document.createElement('iframe');
+    iframe.name='avanz-submit-frame';
+    iframe.style.display='none';
+    document.body.appendChild(iframe);
+
+    const tempForm=document.createElement('form');
+    tempForm.method='POST';
+    tempForm.action=SHEETS_URL;
+    tempForm.target='avanz-submit-frame';
+    tempForm.style.display='none';
+
+    const input=document.createElement('input');
+    input.type='hidden';
+    input.name='payload';
+    input.value=JSON.stringify(obj);
+    tempForm.appendChild(input);
+    document.body.appendChild(tempForm);
+    tempForm.submit();
+
+    setTimeout(()=>{
+      document.body.removeChild(iframe);
+      document.body.removeChild(tempForm);
+    },5000);
+
+    closeModal(formId);form.reset();
+    document.querySelectorAll('.flist').forEach(el=>el.innerHTML='');
+    btn.disabled=false;btn.textContent='Enviar';
+    showToast('¡Solicitud recibida!','Nos pondremos en contacto contigo pronto.');
+    renderAll();
+  }
+
+  if(archivos.length===0){enviar([]);return;}
+
+  const resultados=[];let pendientes=archivos.length;
+  archivos.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      resultados.push({name:file.name,type:file.type,data:ev.target.result.split(',')[1]});
+      pendientes--;
+      if(pendientes===0) enviar(resultados);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function showToast(title,msg){const t=document.getElementById('toast');document.getElementById('t-title').textContent=title;document.getElementById('t-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4500);}
+
+function switchTab(tabId,btn){document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.apanel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('ap-'+tabId).classList.add('active');}
+
+const TABLES={
+  'tbl-proveedores':{key:'avanz_proveedores',cols:['fecha','nombre','rfc','contacto','telefono','email','tipo_equipo','num_unidades','estatus']},
+  'tbl-clientes':{key:'avanz_clientes',cols:['fecha','empresa','contacto','telefono','email','giro','volumen','estatus']},
+  'tbl-viajes-prov':{key:'avanz_viajes_prov',cols:['fecha','proveedor','telefono','tipo_unidad','origen','destino','tarifa','estatus']},
+  'tbl-sol-transporte':{key:'avanz_sol_transporte',cols:['fecha','empresa','contacto','telefono','origen','link_origen','destino','link_destino','fecha_carga','hora_carga','hora_descarga','tipo_equipo','descripcion_carga','peso_kg','estatus']}
+};
+const LABELS={fecha:'Fecha',nombre:'Nombre',rfc:'RFC',contacto:'Contacto',telefono:'Teléfono',email:'Email',tipo_equipo:'Equipo',num_unidades:'Unidades',estatus:'Estatus',empresa:'Empresa',giro:'Giro',volumen:'Volumen',proveedor:'Proveedor',tipo_unidad:'Unidad',origen:'Origen',link_origen:'Ubic. Origen',destino:'Destino',link_destino:'Ubic. Destino',fecha_carga:'Fecha carga',hora_carga:'Hora carga',hora_descarga:'Hora descarga',tarifa:'Tarifa MXN',descripcion_carga:'Carga',peso_kg:'Peso (kg)'};
+
+function renderAll(){
+  Object.entries(TABLES).forEach(([cid,cfg])=>{
+    const data=getDB(cfg.key);const cont=document.getElementById(cid);
+    if(!data.length){cont.innerHTML=`<div class="empty-state"><div class="ei">📭</div><p>Sin registros aún.</p></div>`;return;}
+    let h=`<table class="data-table"><thead><tr>`;
+    cfg.cols.forEach(c=>{h+=`<th>${LABELS[c]||c}</th>`;});
+    h+=`</tr></thead><tbody>`;
+    data.slice().reverse().forEach(row=>{
+      h+=`<tr>`;
+      cfg.cols.forEach(c=>{const v=row[c]||'—';h+=c==='estatus'?`<td><span class="badge badge-pend">${v}</span></td>`:`<td>${v}</td>`;});
+      h+=`</tr>`;
+    });
+    h+=`</tbody></table>`;cont.innerHTML=h;
+  });
+}
+renderAll();
+</script>
+</body>
+</html>
