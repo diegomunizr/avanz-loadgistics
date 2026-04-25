@@ -435,7 +435,7 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
     <div class="fcol"><h4>Acceso</h4><ul><li onclick="openModal('alta-proveedor')">Alta Proveedor</li><li onclick="openModal('solicitud-viaje-proveedor')">Ofertar Viaje</li><li onclick="openModal('alta-cliente')">Alta Cliente</li><li onclick="openModal('solicitud-transporte')">Solicitar Transporte</li></ul></div>
   </div>
   <div class="footer-bottom">
-    <span>© 2025 AVANZ Loadgistics. Todos los derechos reservados.</span>
+    <span>©️ 2025 AVANZ Loadgistics. Todos los derechos reservados.</span>
     <span>Monterrey, Nuevo León, México</span>
   </div>
 </footer>
@@ -607,7 +607,6 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
 
 <script>
 const SHEETS_URL='https://script.google.com/macros/s/AKfycbxv_1OAfT0bGCxoGVfHV8ODBPCeg9kWVFB95OFnfPee6dajTp5mKSn662nBc_jlMjPAUw/exec';
-const TIPO_MAP={'alta-proveedor':'proveedores','solicitud-viaje-proveedor':'viajes_prov','alta-cliente':'clientes','solicitud-transporte':'sol_transporte'};
 const DBKEYS={'alta-proveedor':'avanz_proveedores','solicitud-viaje-proveedor':'avanz_viajes_prov','alta-cliente':'avanz_clientes','solicitud-transporte':'avanz_sol_transporte'};
 const getDB=k=>{try{return JSON.parse(localStorage.getItem(k)||'[]');}catch{return[];}};
 const saveDB=(k,d)=>localStorage.setItem(k,JSON.stringify(d));
@@ -624,7 +623,7 @@ function submitForm(e,formId){
   btn.disabled=true;btn.textContent='Enviando...';
 
   const fd=new FormData(form);
-  const obj={_tipo:TIPO_MAP[formId],fecha:new Date().toLocaleString('es-MX'),estatus:'Pendiente'};
+  const obj={_tipo:formId,fecha:new Date().toLocaleString('es-MX'),estatus:'Pendiente'};
   fd.forEach((v,k)=>{ if(!(v instanceof File)) obj[k]=v; });
 
   const fileInput=form.querySelector('input[type="file"]');
@@ -638,13 +637,13 @@ function submitForm(e,formId){
     delete localObj._tipo;delete localObj._archivos;
     const key=DBKEYS[formId];const db=getDB(key);db.push(localObj);saveDB(key,db);
 
-    // Enviar via GET con script tag (evita CORS completamente)
-    const payload=encodeURIComponent(JSON.stringify(obj));
-    const url=SHEETS_URL+'?payload='+payload;
-    const script=document.createElement('script');
-    script.src=url+'&callback=avanzCallback';
-    document.body.appendChild(script);
-    setTimeout(()=>{ try{document.body.removeChild(script);}catch(e){} },8000);
+    // Enviar via POST (soporta archivos grandes sin límite de URL)
+    fetch(SHEETS_URL,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify(obj)
+    }).catch(err=>console.warn('Sheets error:',err));
 
     closeModal(formId);form.reset();
     document.querySelectorAll('.flist').forEach(el=>el.innerHTML='');
@@ -652,8 +651,6 @@ function submitForm(e,formId){
     showToast('¡Solicitud recibida!','Nos pondremos en contacto contigo pronto.');
     renderAll();
   }
-
-  window.avanzCallback=function(res){ console.log('Sheets response:',res); };
 
   if(archivos.length===0){enviar([]);return;}
   const resultados=[];let pendientes=archivos.length;
@@ -683,16 +680,16 @@ const LABELS={fecha:'Fecha',nombre:'Nombre',rfc:'RFC',contacto:'Contacto',telefo
 function renderAll(){
   Object.entries(TABLES).forEach(([cid,cfg])=>{
     const data=getDB(cfg.key);const cont=document.getElementById(cid);
-    if(!data.length){cont.innerHTML=`<div class="empty-state"><div class="ei">📭</div><p>Sin registros aún.</p></div>`;return;}
-    let h=`<table class="data-table"><thead><tr>`;
-    cfg.cols.forEach(c=>{h+=`<th>${LABELS[c]||c}</th>`;});
-    h+=`</tr></thead><tbody>`;
+    if(!data.length){cont.innerHTML=⁠ <div class="empty-state"><div class="ei">📭</div><p>Sin registros aún.</p></div> ⁠;return;}
+    let h=⁠ <table class="data-table"><thead><tr> ⁠;
+    cfg.cols.forEach(c=>{h+=⁠ <th>${LABELS[c]||c}</th> ⁠;});
+    h+=⁠ </tr></thead><tbody> ⁠;
     data.slice().reverse().forEach(row=>{
-      h+=`<tr>`;
-      cfg.cols.forEach(c=>{const v=row[c]||'—';h+=c==='estatus'?`<td><span class="badge badge-pend">${v}</span></td>`:`<td>${v}</td>`;});
-      h+=`</tr>`;
+      h+=⁠ <tr> ⁠;
+      cfg.cols.forEach(c=>{const v=row[c]||'—';h+=c==='estatus'?⁠ <td><span class="badge badge-pend">${v}</span></td> ⁠:⁠ <td>${v}</td> ⁠;});
+      h+=⁠ </tr> ⁠;
     });
-    h+=`</tbody></table>`;cont.innerHTML=h;
+    h+=⁠ </tbody></table> ⁠;cont.innerHTML=h;
   });
 }
 renderAll();
