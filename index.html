@@ -638,30 +638,13 @@ function submitForm(e,formId){
     delete localObj._tipo;delete localObj._archivos;
     const key=DBKEYS[formId];const db=getDB(key);db.push(localObj);saveDB(key,db);
 
-    // Enviar a Google Sheets via iframe (evita bloqueo CORS de no-cors)
-    const iframe=document.createElement('iframe');
-    iframe.name='avanz-submit-frame';
-    iframe.style.display='none';
-    document.body.appendChild(iframe);
-
-    const tempForm=document.createElement('form');
-    tempForm.method='POST';
-    tempForm.action=SHEETS_URL;
-    tempForm.target='avanz-submit-frame';
-    tempForm.style.display='none';
-
-    const input=document.createElement('input');
-    input.type='hidden';
-    input.name='payload';
-    input.value=JSON.stringify(obj);
-    tempForm.appendChild(input);
-    document.body.appendChild(tempForm);
-    tempForm.submit();
-
-    setTimeout(()=>{
-      document.body.removeChild(iframe);
-      document.body.removeChild(tempForm);
-    },5000);
+    // Enviar via GET con script tag (evita CORS completamente)
+    const payload=encodeURIComponent(JSON.stringify(obj));
+    const url=SHEETS_URL+'?payload='+payload;
+    const script=document.createElement('script');
+    script.src=url+'&callback=avanzCallback';
+    document.body.appendChild(script);
+    setTimeout(()=>{ try{document.body.removeChild(script);}catch(e){} },8000);
 
     closeModal(formId);form.reset();
     document.querySelectorAll('.flist').forEach(el=>el.innerHTML='');
@@ -670,8 +653,9 @@ function submitForm(e,formId){
     renderAll();
   }
 
-  if(archivos.length===0){enviar([]);return;}
+  window.avanzCallback=function(res){ console.log('Sheets response:',res); };
 
+  if(archivos.length===0){enviar([]);return;}
   const resultados=[];let pendientes=archivos.length;
   archivos.forEach(file=>{
     const reader=new FileReader();
