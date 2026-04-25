@@ -425,9 +425,10 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
       <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:#FF8C00;">AVANZ <span style="color:#fff;">LOADGISTICS</span></div>
       <p>Empresa 100% mexicana especializada en gestión y coordinación de transporte de carga terrestre a nivel nacional. Soluciones logísticas eficientes adaptadas a cada cliente.</p>
       <div class="f-contact">
-        <div class="fcol"><h4>Contacto</h4><div class="f-citem">
-          <a href="mailto:ventas@avanz.com.mx">ventas@avanz.com.mx</a></div>
-          <br>
+        <div class="fcol">
+          <h4>Contacto</h4>
+          <div class="f-citem"><a href="mailto:ventas@avanz.com.mx">ventas@avanz.com.mx</a></div>
+        </div>
       </div>
     </div>
     <div class="fcol"><h4>Servicios</h4><ul><li>FTL — Carga Completa</li><li>LTL — Consolidada</li><li>Rutas Nacionales</li><li>Servicios Dedicados</li></ul></div>
@@ -680,16 +681,16 @@ const LABELS={fecha:'Fecha',nombre:'Nombre',rfc:'RFC',contacto:'Contacto',telefo
 function renderAll(){
   Object.entries(TABLES).forEach(([cid,cfg])=>{
     const data=getDB(cfg.key);const cont=document.getElementById(cid);
-    if(!data.length){cont.innerHTML=⁠ <div class="empty-state"><div class="ei">📭</div><p>Sin registros aún.</p></div> ⁠;return;}
-    let h=⁠ <table class="data-table"><thead><tr> ⁠;
-    cfg.cols.forEach(c=>{h+=⁠ <th>${LABELS[c]||c}</th> ⁠;});
-    h+=⁠ </tr></thead><tbody> ⁠;
+    if(!data.length){cont.innerHTML=`<div class="empty-state"><div class="ei">📭</div><p>Sin registros aún.</p></div>`;return;}
+    let h=`<table class="data-table"><thead><tr>`;
+    cfg.cols.forEach(c=>{h+=`<th>${LABELS[c]||c}</th>`;});
+    h+=`</tr></thead><tbody>`;
     data.slice().reverse().forEach(row=>{
-      h+=⁠ <tr> ⁠;
-      cfg.cols.forEach(c=>{const v=row[c]||'—';h+=c==='estatus'?⁠ <td><span class="badge badge-pend">${v}</span></td> ⁠:⁠ <td>${v}</td> ⁠;});
-      h+=⁠ </tr> ⁠;
+      h+=`<tr>`;
+      cfg.cols.forEach(c=>{const v=row[c]||'—';h+=c==='estatus'?`<td><span class="badge badge-pend">${v}</span></td>`:`<td>${v}</td>`;});
+      h+=`</tr>`;
     });
-    h+=⁠ </tbody></table> ⁠;cont.innerHTML=h;
+    h+=`</tbody></table>`;cont.innerHTML=h;
   });
 }
 renderAll();
