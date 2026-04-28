@@ -176,6 +176,8 @@ nav{
 .empty-state{background:var(--blanco);border-radius:10px;text-align:center;padding:60px 20px;border:1px solid var(--gris-linea);color:var(--gris-medio);}
 .empty-state .ei{font-size:48px;margin-bottom:14px;}
 .empty-state p{font-size:14px;}
+.btn-clear-tab{padding:10px 18px;background:transparent;border:1.5px solid var(--error);color:var(--error);font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-clear-tab:hover{background:var(--error);color:var(--blanco);}
 
 /* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;}
@@ -406,11 +408,14 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
   <div class="sec-label">Panel interno</div>
   <div class="sec-title">ADMINISTRACIÓN</div>
   <div class="admin-notice">⚠️ <span>Área interna de AVANZ Loadgistics — Seguimiento de registros y solicitudes recibidas.</span></div>
-  <div class="admin-tabs">
-    <button class="atab active" onclick="switchTab('proveedores',this)">Proveedores</button>
-    <button class="atab" onclick="switchTab('clientes',this)">Clientes</button>
-    <button class="atab" onclick="switchTab('viajes-prov',this)">Solicitudes Proveedor</button>
-    <button class="atab" onclick="switchTab('sol-transporte',this)">Solicitudes Cliente</button>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
+    <div class="admin-tabs" style="margin-bottom:0;">
+      <button class="atab active" onclick="switchTab('proveedores',this)">Proveedores</button>
+      <button class="atab" onclick="switchTab('clientes',this)">Clientes</button>
+      <button class="atab" onclick="switchTab('viajes-prov',this)">Solicitudes Proveedor</button>
+      <button class="atab" onclick="switchTab('sol-transporte',this)">Solicitudes Cliente</button>
+    </div>
+    <button class="btn-clear-tab" onclick="clearCurrentTab()">Limpiar todo</button>
   </div>
   <div id="ap-proveedores" class="apanel active"><div id="tbl-proveedores"></div></div>
   <div id="ap-clientes" class="apanel"><div id="tbl-clientes"></div></div>
@@ -425,10 +430,9 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
       <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:#FF8C00;">AVANZ <span style="color:#fff;">LOADGISTICS</span></div>
       <p>Empresa 100% mexicana especializada en gestión y coordinación de transporte de carga terrestre a nivel nacional. Soluciones logísticas eficientes adaptadas a cada cliente.</p>
       <div class="f-contact">
-        <div class="fcol">
-          <h4>Contacto</h4>
-          <div class="f-citem"><a href="mailto:ventas@avanz.com.mx">ventas@avanz.com.mx</a></div>
-        </div>
+        <div class="fcol"><h4>Contacto</h4><div class="f-citem">
+          <a href="mailto:ventas@avanz.com.mx">ventas@avanz.com.mx</a></div>
+          <br>
       </div>
     </div>
     <div class="fcol"><h4>Servicios</h4><ul><li>FTL — Carga Completa</li><li>LTL — Consolidada</li><li>Rutas Nacionales</li><li>Servicios Dedicados</li></ul></div>
@@ -608,6 +612,7 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
 
 <script>
 const SHEETS_URL='https://script.google.com/macros/s/AKfycbxv_1OAfT0bGCxoGVfHV8ODBPCeg9kWVFB95OFnfPee6dajTp5mKSn662nBc_jlMjPAUw/exec';
+const TIPO_MAP={'alta-proveedor':'proveedores','solicitud-viaje-proveedor':'viajes_prov','alta-cliente':'clientes','solicitud-transporte':'sol_transporte'};
 const DBKEYS={'alta-proveedor':'avanz_proveedores','solicitud-viaje-proveedor':'avanz_viajes_prov','alta-cliente':'avanz_clientes','solicitud-transporte':'avanz_sol_transporte'};
 const getDB=k=>{try{return JSON.parse(localStorage.getItem(k)||'[]');}catch{return[];}};
 const saveDB=(k,d)=>localStorage.setItem(k,JSON.stringify(d));
@@ -624,7 +629,7 @@ function submitForm(e,formId){
   btn.disabled=true;btn.textContent='Enviando...';
 
   const fd=new FormData(form);
-  const obj={_tipo:formId,fecha:new Date().toLocaleString('es-MX'),estatus:'Pendiente'};
+  const obj={_tipo:TIPO_MAP[formId],fecha:new Date().toLocaleString('es-MX'),estatus:'Pendiente'};
   fd.forEach((v,k)=>{ if(!(v instanceof File)) obj[k]=v; });
 
   const fileInput=form.querySelector('input[type="file"]');
@@ -638,13 +643,13 @@ function submitForm(e,formId){
     delete localObj._tipo;delete localObj._archivos;
     const key=DBKEYS[formId];const db=getDB(key);db.push(localObj);saveDB(key,db);
 
-    // Enviar via POST (soporta archivos grandes sin límite de URL)
-    fetch(SHEETS_URL,{
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify(obj)
-    }).catch(err=>console.warn('Sheets error:',err));
+    // Enviar via GET con script tag (evita CORS completamente)
+    const payload=encodeURIComponent(JSON.stringify(obj));
+    const url=SHEETS_URL+'?payload='+payload;
+    const script=document.createElement('script');
+    script.src=url+'&callback=avanzCallback';
+    document.body.appendChild(script);
+    setTimeout(()=>{ try{document.body.removeChild(script);}catch(e){} },8000);
 
     closeModal(formId);form.reset();
     document.querySelectorAll('.flist').forEach(el=>el.innerHTML='');
@@ -652,6 +657,8 @@ function submitForm(e,formId){
     showToast('¡Solicitud recibida!','Nos pondremos en contacto contigo pronto.');
     renderAll();
   }
+
+  window.avanzCallback=function(res){ console.log('Sheets response:',res); };
 
   if(archivos.length===0){enviar([]);return;}
   const resultados=[];let pendientes=archivos.length;
@@ -668,7 +675,10 @@ function submitForm(e,formId){
 
 function showToast(title,msg){const t=document.getElementById('toast');document.getElementById('t-title').textContent=title;document.getElementById('t-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4500);}
 
-function switchTab(tabId,btn){document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.apanel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('ap-'+tabId).classList.add('active');}
+const TAB_KEY_MAP={'proveedores':'avanz_proveedores','clientes':'avanz_clientes','viajes-prov':'avanz_viajes_prov','sol-transporte':'avanz_sol_transporte'};
+let currentTabKey='avanz_proveedores';
+function switchTab(tabId,btn){document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.apanel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('ap-'+tabId).classList.add('active');currentTabKey=TAB_KEY_MAP[tabId]||'';}
+function clearCurrentTab(){if(!confirm('¿Seguro que quieres limpiar el historial de TODAS las pestañas? No se puede deshacer.'))return;Object.values(DBKEYS).forEach(k=>localStorage.removeItem(k));renderAll();showToast('Historial limpiado','Todos los registros fueron eliminados.');}
 
 const TABLES={
   'tbl-proveedores':{key:'avanz_proveedores',cols:['fecha','nombre','rfc','contacto','telefono','email','tipo_equipo','num_unidades','estatus']},
