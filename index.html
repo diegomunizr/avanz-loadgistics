@@ -612,7 +612,7 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
 
 <script>
 const SHEETS_URL='https://script.google.com/macros/s/AKfycbxv_1OAfT0bGCxoGVfHV8ODBPCeg9kWVFB95OFnfPee6dajTp5mKSn662nBc_jlMjPAUw/exec';
-const TIPO_MAP={'alta-proveedor':'proveedores','solicitud-viaje-proveedor':'viajes_prov','alta-cliente':'clientes','solicitud-transporte':'sol_transporte'};
+const TIPO_MAP={'alta-proveedor':'alta-proveedor','solicitud-viaje-proveedor':'solicitud-viaje-proveedor','alta-cliente':'alta-cliente','solicitud-transporte':'solicitud-transporte'};
 const DBKEYS={'alta-proveedor':'avanz_proveedores','solicitud-viaje-proveedor':'avanz_viajes_prov','alta-cliente':'avanz_clientes','solicitud-transporte':'avanz_sol_transporte'};
 const getDB=k=>{try{return JSON.parse(localStorage.getItem(k)||'[]');}catch{return[];}};
 const saveDB=(k,d)=>localStorage.setItem(k,JSON.stringify(d));
