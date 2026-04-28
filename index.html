@@ -620,96 +620,38 @@ function handleFiles(input,area){const list=document.getElementById('flist-'+are
 
 function submitForm(e,formId){
   e.preventDefault();
-
-  const form=e.target;
-  const btn=form.querySelector('.btn-submit');
-  if (btn.disabled) return;
-
-  btn.disabled=true;
-  btn.textContent='Enviando...';
+  const form=e.target;const btn=form.querySelector('.btn-submit');
+  btn.disabled=true;btn.textContent='Enviando...';
 
   const fd=new FormData(form);
-
-  const obj={
-    _tipo:formId,
-    id: Date.now(),
-    fecha:new Date().toLocaleString('es-MX'),
-    estatus:'Pendiente'
-  };
-
-  fd.forEach((v,k)=>{
-    if(!(v instanceof File)) obj[k]=v;
-  });
+  const obj={_tipo:formId,fecha:new Date().toLocaleString('es-MX'),estatus:'Pendiente'};
+  fd.forEach((v,k)=>{ if(!(v instanceof File)) obj[k]=v; });
 
   const fileInput=form.querySelector('input[type="file"]');
-  const archivos = (fileInput && fileInput.files && fileInput.files.length > 0)
-    ? Array.from(fileInput.files)
-    : [];
+  const archivos=fileInput && fileInput.files.length>0 ? Array.from(fileInput.files) : [];
 
   function enviar(archivosB64){
-    if(archivosB64.length>0){
-      obj._archivos=JSON.stringify(archivosB64);
-    }
+    if(archivosB64.length>0) obj._archivos=JSON.stringify(archivosB64);
 
     // Guardar local
-    const localObj={...obj};
-    delete localObj._tipo;
-    delete localObj._archivos;
+    const localObj=Object.assign({},obj);
+    delete localObj._tipo;delete localObj._archivos;
+    const key=DBKEYS[formId];const db=getDB(key);db.push(localObj);saveDB(key,db);
 
-    const key=DBKEYS[formId];
-    const db=getDB(key);
-    db.push(localObj);
-    saveDB(key,db);
-
-    // Enviar a Google Sheets
+    // Enviar via POST (soporta archivos grandes sin límite de URL)
     fetch(SHEETS_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
       body:JSON.stringify(obj)
-    })
-    .then(()=>console.log('Enviado correctamente'))
-    .catch(err=>{
-      console.warn('Sheets error:',err);
-      showToast('Error','No se pudo guardar en servidor');
-    });
+    }).catch(err=>console.warn('Sheets error:',err));
 
-    form.reset();
-
-    const flist=form.querySelector('.flist');
-    if(flist) flist.innerHTML='';
-
-    btn.disabled=false;
-    btn.textContent='Enviar';
-
-    closeModal(formId);
-
+    closeModal(formId);form.reset();
+    document.querySelectorAll('.flist').forEach(el=>el.innerHTML='');
+    btn.disabled=false;btn.textContent='Enviar';
     showToast('¡Solicitud recibida!','Nos pondremos en contacto contigo pronto.');
-
     renderAll();
   }
-
-  if(archivos.length===0){
-    enviar([]);
-    return;
-  }
-
-  const resultados=[];
-  let pendientes=archivos.length;
-
-  archivos.forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=function(ev){
-      resultados.push({
-        name:file.name,
-        type:file.type,
-        data:ev.target.result.split(',')[1]
-      });
-      pendientes--;
-      if(pendientes===0) enviar(resultados);
-    };
-    reader.readAsDataURL(file);
-  });
-}
 
   if(archivos.length===0){enviar([]);return;}
   const resultados=[];let pendientes=archivos.length;
