@@ -704,21 +704,6 @@ function enviarDatos(obj, formId, form, btn) {
   script.onerror = () => console.warn('JSONP script error');
   document.body.appendChild(script);
 }
-  
-  if (archivos.length === 0) { enviar([]); return; }
-
-  const resultados = [];
-  let pendientes   = archivos.length;
-  archivos.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      resultados.push({ name: file.name, type: file.type, data: ev.target.result.split(',')[1] });
-      pendientes--;
-      if (pendientes === 0) enviar(resultados);
-    };
-    reader.readAsDataURL(file);
-  });
-}
 
 function showToast(title, msg) {
   const t = document.getElementById('toast');
