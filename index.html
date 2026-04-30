@@ -666,13 +666,54 @@ function submitForm(e, formId) {
   const btn  = form.querySelector('.btn-submit');
   btn.disabled    = true;
   btn.textContent = 'Enviando...';
+
   const fd  = new FormData(form);
   const obj = { _tipo: formId, fecha: new Date().toLocaleString('es-MX'), estatus: 'Pendiente' };
   fd.forEach((v, k) => { if (!(v instanceof File)) obj[k] = v; });
-  enviarDatos(obj, formId, form, btn);
+
+  const fileInput = form.querySelector('input[type="file"]');
+  const archivos  = (fileInput && fileInput.files.length > 0)
+    ? Array.from(fileInput.files) : [];
+
+  if (archivos.length === 0) {
+    enviarDatos(obj, formId, form, btn, []);
+    return;
+  }
+
+  const leidos = [];
+  let pendientes = archivos.length;
+  archivos.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      leidos.push({ name: file.name, type: file.type, data: ev.target.result.split(',')[1] });
+      pendientes--;
+      if (pendientes === 0) enviarDatos(obj, formId, form, btn, leidos);
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
-function enviarDatos(obj, formId, form, btn) {
+function enviarJSONP(payload, callback) {
+  const cbName = 'avanzCB_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  window[cbName] = function(resp) {
+    const el = document.getElementById(cbName);
+    if (el) el.remove();
+    delete window[cbName];
+    if (callback) callback(resp);
+  };
+  const script = document.createElement('script');
+  script.id    = cbName;
+  script.src   = SHEETS_URL
+    + '?callback=' + cbName
+    + '&payload='  + encodeURIComponent(JSON.stringify(payload));
+  script.onerror = () => {
+    console.warn('JSONP error');
+    if (callback) callback({ ok: false, error: 'script error' });
+  };
+  document.body.appendChild(script);
+}
+
+function enviarDatos(obj, formId, form, btn, archivos) {
   const localObj = Object.assign({}, obj);
   delete localObj._tipo;
   const key = DBKEYS[formId];
@@ -688,21 +729,41 @@ function enviarDatos(obj, formId, form, btn) {
   showToast('¡Solicitud recibida!', 'Nos pondremos en contacto contigo pronto.');
   renderAll();
 
-  const cbName = 'avanzCB_' + Date.now();
-  window[cbName] = function(resp) {
-    if (!resp || !resp.ok) console.warn('Sheets error:', resp);
-    const el = document.getElementById(cbName);
-    if (el) el.remove();
-    delete window[cbName];
-  };
+  const nombreBase = obj.nombre || obj.empresa || 'Sin nombre';
+  const timestamp  = new Date().toLocaleString('es-MX');
 
-  const script = document.createElement('script');
-  script.id    = cbName;
-  script.src   = SHEETS_URL
-    + '?callback=' + cbName
-    + '&payload=' + encodeURIComponent(JSON.stringify(obj));
-  script.onerror = () => console.warn('JSONP script error');
-  document.body.appendChild(script);
+  if (archivos.length === 0) {
+    enviarJSONP(obj, resp => {
+      if (!resp.ok) console.warn('Sheets error:', resp.error);
+    });
+    return;
+  }
+
+  // Primera llamada: datos + primer archivo
+  const primeraLlamada = Object.assign({}, obj, {
+    _archivos:  JSON.stringify([archivos[0]]),
+    _timestamp: timestamp
+  });
+
+  enviarJSONP(primeraLlamada, resp => {
+    if (!resp.ok) { console.warn('Error datos:', resp.error); return; }
+
+    // Archivos restantes uno por uno en la misma carpeta
+    archivos.slice(1).reduce((promesa, archivo) => {
+      return promesa.then(() => new Promise(resolve => {
+        const payload = {
+          _tipo:           formId,
+          _solo_archivo:   true,
+          _nombre_carpeta: nombreBase + ' — ' + timestamp,
+          _archivos:       JSON.stringify([archivo])
+        };
+        enviarJSONP(payload, r => {
+          if (!r.ok) console.warn('Error archivo:', r.error);
+          resolve();
+        });
+      }));
+    }, Promise.resolve());
+  });
 }
 
 function showToast(title, msg) {
