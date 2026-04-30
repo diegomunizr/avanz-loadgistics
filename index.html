@@ -731,36 +731,39 @@ function enviarDatos(obj, formId, form, btn, archivos) {
 
   const nombreBase = obj.nombre || obj.empresa || 'Sin nombre';
   const timestamp  = new Date().toLocaleString('es-MX');
+  const nombreCarpeta = nombreBase + ' — ' + timestamp;
 
-  if (archivos.length === 0) {
-    enviarJSONP(obj, resp => {
-      if (!resp.ok) console.warn('Sheets error:', resp.error);
-    });
-    return;
-  }
+  // Primero mandamos los datos SIN archivos
+  enviarJSONP(obj, resp => {
+    if (!resp.ok) { console.warn('Sheets error:', resp.error); return; }
 
-  // Primera llamada: datos + primer archivo
-  const primeraLlamada = Object.assign({}, obj, {
-    _archivos:  JSON.stringify([archivos[0]]),
-    _timestamp: timestamp
-  });
+    // Luego mandamos cada archivo por separado
+    if (archivos.length === 0) return;
 
-  enviarJSONP(primeraLlamada, resp => {
-    if (!resp.ok) { console.warn('Error datos:', resp.error); return; }
-
-    // Archivos restantes uno por uno en la misma carpeta
-    archivos.slice(1).reduce((promesa, archivo) => {
+    archivos.reduce((promesa, archivo) => {
       return promesa.then(() => new Promise(resolve => {
-        const payload = {
-          _tipo:           formId,
-          _solo_archivo:   true,
-          _nombre_carpeta: nombreBase + ' — ' + timestamp,
-          _archivos:       JSON.stringify([archivo])
-        };
-        enviarJSONP(payload, r => {
-          if (!r.ok) console.warn('Error archivo:', r.error);
+        // Dividir el archivo en chunks de 500KB en base64
+        const chunkSize = 500 * 1024; // 500KB en bytes originales
+        const b64 = archivo.data;
+        const totalChunks = Math.ceil((b64.length * 3/4) / chunkSize);
+
+        if (b64.length <= chunkSize * 1.4) {
+          // Archivo pequeño — mandar directo
+          const payload = {
+            _tipo:           formId,
+            _solo_archivo:   true,
+            _nombre_carpeta: nombreCarpeta,
+            _archivos:       JSON.stringify([archivo])
+          };
+          enviarJSONP(payload, r => {
+            if (!r.ok) console.warn('Error archivo:', r.error);
+            resolve();
+          });
+        } else {
+          // Archivo grande — avisar en consola y saltar
+          console.warn('Archivo demasiado grande para JSONP:', archivo.name);
           resolve();
-        });
+        }
       }));
     }, Promise.resolve());
   });
