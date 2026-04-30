@@ -666,17 +666,13 @@ function submitForm(e, formId) {
   const btn  = form.querySelector('.btn-submit');
   btn.disabled    = true;
   btn.textContent = 'Enviando...';
-
   const fd  = new FormData(form);
   const obj = { _tipo: formId, fecha: new Date().toLocaleString('es-MX'), estatus: 'Pendiente' };
   fd.forEach((v, k) => { if (!(v instanceof File)) obj[k] = v; });
-
-  // Sin archivos — solo datos del formulario via JSONP
   enviarDatos(obj, formId, form, btn);
 }
 
 function enviarDatos(obj, formId, form, btn) {
-  // Guardar local
   const localObj = Object.assign({}, obj);
   delete localObj._tipo;
   const key = DBKEYS[formId];
@@ -684,7 +680,6 @@ function enviarDatos(obj, formId, form, btn) {
   db.push(localObj);
   saveDB(key, db);
 
-  // Cerrar modal y resetear UI
   closeModal(formId);
   form.reset();
   document.querySelectorAll('.flist').forEach(el => el.innerHTML = '');
@@ -693,7 +688,6 @@ function enviarDatos(obj, formId, form, btn) {
   showToast('¡Solicitud recibida!', 'Nos pondremos en contacto contigo pronto.');
   renderAll();
 
-  // Enviar a Sheets via JSONP (sin archivos en base64)
   const cbName = 'avanzCB_' + Date.now();
   window[cbName] = function(resp) {
     if (!resp || !resp.ok) console.warn('Sheets error:', resp);
@@ -702,14 +696,15 @@ function enviarDatos(obj, formId, form, btn) {
     delete window[cbName];
   };
 
-  const script   = document.createElement('script');
-  script.id      = cbName;
-  script.src     = SHEETS_URL
+  const script = document.createElement('script');
+  script.id    = cbName;
+  script.src   = SHEETS_URL
     + '?callback=' + cbName
     + '&payload=' + encodeURIComponent(JSON.stringify(obj));
   script.onerror = () => console.warn('JSONP script error');
   document.body.appendChild(script);
 }
+  
   if (archivos.length === 0) { enviar([]); return; }
 
   const resultados = [];
