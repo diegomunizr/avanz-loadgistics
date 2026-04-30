@@ -628,7 +628,9 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
 </div>
 
 <script>
+// ─── CONFIGURACIÓN ───────────────────────────────────────────────────────────
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxv_1OAfT0bGCxoGVfHV8ODBPCeg9kWVFB95OFnfPee6dajTp5mKSn662nBc_jlMjPAUw/exec';
+
 const DBKEYS = {
   'alta-proveedor':            'avanz_proveedores',
   'solicitud-viaje-proveedor': 'avanz_viajes_prov',
@@ -636,9 +638,11 @@ const DBKEYS = {
   'solicitud-transporte':      'avanz_sol_transporte'
 };
 
+// ─── LOCAL STORAGE ────────────────────────────────────────────────────────────
 const getDB  = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch { return []; } };
 const saveDB = (k, d) => localStorage.setItem(k, JSON.stringify(d));
 
+// ─── MODALES ─────────────────────────────────────────────────────────────────
 function openModal(id)  { document.getElementById('modal-' + id).classList.add('active');    document.body.style.overflow = 'hidden'; }
 function closeModal(id) { document.getElementById('modal-' + id).classList.remove('active'); document.body.style.overflow = ''; }
 
@@ -648,6 +652,7 @@ document.querySelectorAll('.modal-overlay').forEach(el => {
   });
 });
 
+// ─── ARCHIVOS ─────────────────────────────────────────────────────────────────
 function handleFiles(input, area) {
   const list = document.getElementById('flist-' + area);
   if (!list) return;
@@ -655,44 +660,22 @@ function handleFiles(input, area) {
   Array.from(input.files).forEach(f => {
     const d = document.createElement('div');
     d.className = 'fitem';
-    d.textContent = '📄 ' + f.name;
+    d.textContent = '📄 ' + f.name + ' (' + (f.size / 1024).toFixed(0) + ' KB)';
     list.appendChild(d);
   });
 }
 
-function submitForm(e, formId) {
-  e.preventDefault();
-  const form = e.target;
-  const btn  = form.querySelector('.btn-submit');
-  btn.disabled    = true;
-  btn.textContent = 'Enviando...';
-
-  const fd  = new FormData(form);
-  const obj = { _tipo: formId, fecha: new Date().toLocaleString('es-MX'), estatus: 'Pendiente' };
-  fd.forEach((v, k) => { if (!(v instanceof File)) obj[k] = v; });
-
-  const fileInput = form.querySelector('input[type="file"]');
-  const archivos  = (fileInput && fileInput.files.length > 0)
-    ? Array.from(fileInput.files) : [];
-
-  if (archivos.length === 0) {
-    enviarDatos(obj, formId, form, btn, []);
-    return;
-  }
-
-  const leidos = [];
-  let pendientes = archivos.length;
-  archivos.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      leidos.push({ name: file.name, type: file.type, data: ev.target.result.split(',')[1] });
-      pendientes--;
-      if (pendientes === 0) enviarDatos(obj, formId, form, btn, leidos);
-    };
-    reader.readAsDataURL(file);
-  });
+// ─── TIMESTAMP LIMPIO (sin caracteres especiales) ────────────────────────────
+function timestampLimpio() {
+  const now = new Date();
+  return now.getFullYear() + '-'
+    + String(now.getMonth() + 1).padStart(2, '0') + '-'
+    + String(now.getDate()).padStart(2, '0') + ' '
+    + String(now.getHours()).padStart(2, '0') + ':'
+    + String(now.getMinutes()).padStart(2, '0');
 }
 
+// ─── ENVÍO JSONP — solo para datos del formulario (sin archivos) ──────────────
 function enviarJSONP(payload, callback) {
   const cbName = 'avanzCB_' + Date.now() + '_' + Math.random().toString(36).slice(2);
   window[cbName] = function(resp) {
@@ -713,7 +696,69 @@ function enviarJSONP(payload, callback) {
   document.body.appendChild(script);
 }
 
+// ─── ENVÍO POST — para archivos (sin límite de tamaño en URL) ────────────────
+function enviarPost(payload, callback) {
+  fetch(SHEETS_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'text/plain' }, // evita preflight CORS
+    body:    JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(resp => { if (callback) callback(resp); })
+  .catch(err => {
+    console.warn('POST error:', err);
+    if (callback) callback({ ok: false, error: err.message });
+  });
+}
+
+// ─── SUBMIT FORM ──────────────────────────────────────────────────────────────
+function submitForm(e, formId) {
+  e.preventDefault();
+  const form = e.target;
+  const btn  = form.querySelector('.btn-submit');
+  btn.disabled    = true;
+  btn.textContent = 'Enviando...';
+
+  const fd  = new FormData(form);
+  const obj = {
+    _tipo:   formId,
+    fecha:   new Date().toLocaleString('es-MX'),
+    estatus: 'Pendiente'
+  };
+  fd.forEach((v, k) => { if (!(v instanceof File)) obj[k] = v; });
+
+  const fileInput = form.querySelector('input[type="file"]');
+  const archivos  = (fileInput && fileInput.files.length > 0)
+    ? Array.from(fileInput.files) : [];
+
+  if (archivos.length === 0) {
+    // Sin archivos → enviar solo datos por JSONP
+    enviarDatos(obj, formId, form, btn, []);
+    return;
+  }
+
+  // Leer todos los archivos como base64
+  const leidos   = [];
+  let pendientes = archivos.length;
+  archivos.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      leidos.push({
+        name: file.name,
+        type: file.type,
+        data: ev.target.result.split(',')[1]
+      });
+      pendientes--;
+      if (pendientes === 0) enviarDatos(obj, formId, form, btn, leidos);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ─── ENVIAR DATOS + ARCHIVOS ──────────────────────────────────────────────────
 function enviarDatos(obj, formId, form, btn, archivos) {
+
+  // 1. Guardar en localStorage para la tabla admin
   const localObj = Object.assign({}, obj);
   delete localObj._tipo;
   const key = DBKEYS[formId];
@@ -721,6 +766,7 @@ function enviarDatos(obj, formId, form, btn, archivos) {
   db.push(localObj);
   saveDB(key, db);
 
+  // 2. Cerrar modal y limpiar UI
   closeModal(formId);
   form.reset();
   document.querySelectorAll('.flist').forEach(el => el.innerHTML = '');
@@ -729,46 +775,43 @@ function enviarDatos(obj, formId, form, btn, archivos) {
   showToast('¡Solicitud recibida!', 'Nos pondremos en contacto contigo pronto.');
   renderAll();
 
-  const nombreBase = obj.nombre || obj.empresa || 'Sin nombre';
-  const timestamp  = new Date().toLocaleString('es-MX');
-  const nombreCarpeta = nombreBase + ' — ' + timestamp;
+  // 3. Nombre de carpeta con timestamp limpio (sin caracteres problemáticos)
+  const nombreBase    = obj.nombre || obj.empresa || 'Sin nombre';
+  const ts            = timestampLimpio();
+  const nombreCarpeta = nombreBase + ' — ' + ts;
 
-  // Primero mandamos los datos SIN archivos
-  enviarJSONP(obj, resp => {
-    if (!resp.ok) { console.warn('Sheets error:', resp.error); return; }
+  // 4. Primero enviar los datos del formulario (JSONP — liviano)
+  enviarJSONP(obj, function(resp) {
+    if (!resp.ok) {
+      console.warn('Error al enviar datos a Sheets:', resp.error);
+      return;
+    }
 
-    // Luego mandamos cada archivo por separado
+    // 5. Luego enviar cada archivo por POST (sin límite de URL)
     if (archivos.length === 0) return;
 
-    archivos.reduce((promesa, archivo) => {
-      return promesa.then(() => new Promise(resolve => {
-        // Dividir el archivo en chunks de 500KB en base64
-        const chunkSize = 500 * 1024; // 500KB en bytes originales
-        const b64 = archivo.data;
-        const totalChunks = Math.ceil((b64.length * 3/4) / chunkSize);
-
-        if (b64.length <= chunkSize * 1.4) {
-          // Archivo pequeño — mandar directo
+    archivos.reduce(function(promesa, archivo) {
+      return promesa.then(function() {
+        return new Promise(function(resolve) {
           const payload = {
             _tipo:           formId,
             _solo_archivo:   true,
             _nombre_carpeta: nombreCarpeta,
             _archivos:       JSON.stringify([archivo])
           };
-          enviarJSONP(payload, r => {
-            if (!r.ok) console.warn('Error archivo:', r.error);
+          // ✅ POST en lugar de JSONP — soporta archivos grandes
+          enviarPost(payload, function(r) {
+            if (!r.ok) console.warn('Error subiendo archivo:', archivo.name, r.error);
+            else console.log('Archivo subido OK:', archivo.name);
             resolve();
           });
-        } else {
-          // Archivo grande — avisar en consola y saltar
-          console.warn('Archivo demasiado grande para JSONP:', archivo.name);
-          resolve();
-        }
-      }));
+        });
+      });
     }, Promise.resolve());
   });
 }
 
+// ─── TOAST ────────────────────────────────────────────────────────────────────
 function showToast(title, msg) {
   const t = document.getElementById('toast');
   document.getElementById('t-title').textContent = title;
@@ -777,6 +820,7 @@ function showToast(title, msg) {
   setTimeout(() => t.classList.remove('show'), 4500);
 }
 
+// ─── TABS ADMIN ───────────────────────────────────────────────────────────────
 function switchTab(tabId, btn) {
   document.querySelectorAll('.atab').forEach(b  => b.classList.remove('active'));
   document.querySelectorAll('.apanel').forEach(p => p.classList.remove('active'));
@@ -784,11 +828,12 @@ function switchTab(tabId, btn) {
   document.getElementById('ap-' + tabId).classList.add('active');
 }
 
+// ─── TABLAS ADMIN ─────────────────────────────────────────────────────────────
 const TABLES = {
-  'tbl-proveedores':    { key: 'avanz_proveedores',     cols: ['fecha','nombre','rfc','contacto','telefono','email','tipo_equipo','num_unidades','estatus'] },
-  'tbl-clientes':       { key: 'avanz_clientes',        cols: ['fecha','empresa','contacto','telefono','email','giro','volumen','estatus'] },
-  'tbl-viajes-prov':   { key: 'avanz_viajes_prov',     cols: ['fecha','proveedor','telefono','tipo_unidad','origen','destino','tarifa','estatus'] },
-  'tbl-sol-transporte': { key: 'avanz_sol_transporte',  cols: ['fecha','empresa','contacto','telefono','origen','link_origen','destino','link_destino','fecha_carga','hora_carga','hora_descarga','tipo_equipo','descripcion_carga','peso_kg','estatus'] }
+  'tbl-proveedores':    { key: 'avanz_proveedores',    cols: ['fecha','nombre','rfc','contacto','telefono','email','tipo_equipo','num_unidades','estatus'] },
+  'tbl-clientes':       { key: 'avanz_clientes',       cols: ['fecha','empresa','contacto','telefono','email','giro','volumen','estatus'] },
+  'tbl-viajes-prov':   { key: 'avanz_viajes_prov',    cols: ['fecha','proveedor','telefono','tipo_unidad','origen','destino','tarifa','estatus'] },
+  'tbl-sol-transporte': { key: 'avanz_sol_transporte', cols: ['fecha','empresa','contacto','telefono','origen','link_origen','destino','link_destino','fecha_carga','hora_carga','hora_descarga','tipo_equipo','descripcion_carga','peso_kg','estatus'] }
 };
 
 const LABELS = {
