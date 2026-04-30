@@ -686,14 +686,7 @@ function submitForm(e, formId) {
     db.push(localObj);
     saveDB(key, db);
 
-    // Enviar a Google Sheets via POST
-    fetch(SHEETS_URL, {
-      method:  'POST',
-      mode:    'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body:    JSON.stringify(obj)
-    }).catch(err => console.warn('Sheets error:', err));
-
+    // Cerrar modal y resetear UI de inmediato
     closeModal(formId);
     form.reset();
     document.querySelectorAll('.flist').forEach(el => el.innerHTML = '');
@@ -701,6 +694,21 @@ function submitForm(e, formId) {
     btn.textContent = 'Enviar';
     showToast('¡Solicitud recibida!', 'Nos pondremos en contacto contigo pronto.');
     renderAll();
+
+    // Enviar a Google Sheets via JSONP (GET) — evita el problema de CORS con no-cors
+    const cbName = 'avanzCallback_' + Date.now();
+    window[cbName] = function(resp) {
+      if (!resp.ok) console.warn('Sheets error:', resp.error);
+      delete window[cbName];
+      document.getElementById(cbName) && document.getElementById(cbName).remove();
+    };
+
+    const payload  = encodeURIComponent(JSON.stringify(obj));
+    const script   = document.createElement('script');
+    script.id      = cbName;
+    script.src     = SHEETS_URL + '?callback=' + cbName + '&payload=' + payload;
+    script.onerror = () => console.warn('JSONP error al enviar a Sheets');
+    document.body.appendChild(script);
   }
 
   if (archivos.length === 0) { enviar([]); return; }
