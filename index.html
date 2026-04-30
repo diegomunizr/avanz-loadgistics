@@ -671,46 +671,45 @@ function submitForm(e, formId) {
   const obj = { _tipo: formId, fecha: new Date().toLocaleString('es-MX'), estatus: 'Pendiente' };
   fd.forEach((v, k) => { if (!(v instanceof File)) obj[k] = v; });
 
-  const fileInput = form.querySelector('input[type="file"]');
-  const archivos  = (fileInput && fileInput.files.length > 0) ? Array.from(fileInput.files) : [];
+  // Sin archivos — solo datos del formulario via JSONP
+  enviarDatos(obj, formId, form, btn);
+}
 
-  function enviar(archivosB64) {
-    if (archivosB64.length > 0) obj._archivos = JSON.stringify(archivosB64);
+function enviarDatos(obj, formId, form, btn) {
+  // Guardar local
+  const localObj = Object.assign({}, obj);
+  delete localObj._tipo;
+  const key = DBKEYS[formId];
+  const db  = getDB(key);
+  db.push(localObj);
+  saveDB(key, db);
 
-    // Guardar local
-    const localObj = Object.assign({}, obj);
-    delete localObj._tipo;
-    delete localObj._archivos;
-    const key = DBKEYS[formId];
-    const db  = getDB(key);
-    db.push(localObj);
-    saveDB(key, db);
+  // Cerrar modal y resetear UI
+  closeModal(formId);
+  form.reset();
+  document.querySelectorAll('.flist').forEach(el => el.innerHTML = '');
+  btn.disabled    = false;
+  btn.textContent = 'Enviar';
+  showToast('¡Solicitud recibida!', 'Nos pondremos en contacto contigo pronto.');
+  renderAll();
 
-    // Cerrar modal y resetear UI de inmediato
-    closeModal(formId);
-    form.reset();
-    document.querySelectorAll('.flist').forEach(el => el.innerHTML = '');
-    btn.disabled    = false;
-    btn.textContent = 'Enviar';
-    showToast('¡Solicitud recibida!', 'Nos pondremos en contacto contigo pronto.');
-    renderAll();
+  // Enviar a Sheets via JSONP (sin archivos en base64)
+  const cbName = 'avanzCB_' + Date.now();
+  window[cbName] = function(resp) {
+    if (!resp || !resp.ok) console.warn('Sheets error:', resp);
+    const el = document.getElementById(cbName);
+    if (el) el.remove();
+    delete window[cbName];
+  };
 
-    // Enviar a Google Sheets via JSONP (GET) — evita el problema de CORS con no-cors
-    const cbName = 'avanzCallback_' + Date.now();
-    window[cbName] = function(resp) {
-      if (!resp.ok) console.warn('Sheets error:', resp.error);
-      delete window[cbName];
-      document.getElementById(cbName) && document.getElementById(cbName).remove();
-    };
-
-    const payload  = encodeURIComponent(JSON.stringify(obj));
-    const script   = document.createElement('script');
-    script.id      = cbName;
-    script.src     = SHEETS_URL + '?callback=' + cbName + '&payload=' + payload;
-    script.onerror = () => console.warn('JSONP error al enviar a Sheets');
-    document.body.appendChild(script);
-  }
-
+  const script   = document.createElement('script');
+  script.id      = cbName;
+  script.src     = SHEETS_URL
+    + '?callback=' + cbName
+    + '&payload=' + encodeURIComponent(JSON.stringify(obj));
+  script.onerror = () => console.warn('JSONP script error');
+  document.body.appendChild(script);
+}
   if (archivos.length === 0) { enviar([]); return; }
 
   const resultados = [];
