@@ -174,8 +174,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255
 .btn-submit:hover{background:var(--naranja-dark);transform:translateY(-1px);box-shadow:0 10px 30px rgba(255,140,0,.35);}
 .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
 /* ── Pantalla de progreso de subida ── */
-.upload-overlay{display:none;position:absolute;inset:0;z-index:10;background:rgba(255,255,255,0.97);border-radius:14px;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:40px;}
+.upload-overlay{display:none;position:fixed;inset:0;z-index:2100;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);flex-direction:column;align-items:center;justify-content:center;padding:20px;}
 .upload-overlay.active{display:flex;}
+.upload-overlay-box{background:var(--blanco);border-radius:14px;padding:40px 36px;display:flex;flex-direction:column;align-items:center;gap:18px;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.25);}
 .upload-spinner{width:52px;height:52px;border:4px solid var(--gris-linea);border-top-color:var(--naranja);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .upload-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--negro);letter-spacing:1px;text-align:center;}
@@ -418,14 +419,16 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
 <div class="modal-overlay" id="modal-alta-proveedor">
   <div class="modal">
     <div class="modal-head"><h2>🚚 Alta de Proveedor</h2><button class="mclose" id="mclose-alta-proveedor" onclick="closeModal('alta-proveedor')">✕</button></div>
-    <!-- Pantalla de progreso — cubre el modal mientras suben los archivos -->
+    <!-- Pantalla de progreso — cubre toda la pantalla mientras suben los archivos -->
     <div class="upload-overlay" id="upload-overlay-alta-proveedor">
-      <div class="upload-spinner"></div>
-      <div class="upload-title">Subiendo documentos...</div>
-      <div class="upload-bar-wrap"><div class="upload-bar" id="upload-bar-alta-proveedor"></div></div>
-      <div class="upload-counter" id="upload-counter-alta-proveedor">0 / 0 archivos</div>
-      <div class="upload-subtitle">Por favor <strong>no cierres esta ventana</strong> hasta que termine la carga.</div>
-      <div class="upload-warning">⚠️ Cerrar la página cancelará el envío</div>
+      <div class="upload-overlay-box">
+        <div class="upload-spinner"></div>
+        <div class="upload-title">Subiendo documentos...</div>
+        <div class="upload-bar-wrap"><div class="upload-bar" id="upload-bar-alta-proveedor"></div></div>
+        <div class="upload-counter" id="upload-counter-alta-proveedor">0 / 0 archivos</div>
+        <div class="upload-subtitle">Por favor <strong>no cierres esta ventana</strong> hasta que termine la carga.</div>
+        <div class="upload-warning">⚠️ Cerrar la página cancelará el envío</div>
+      </div>
     </div>
     <div class="modal-body">
       <div style="background:var(--naranja-pale);border:1px solid rgba(255,140,0,.3);border-radius:10px;padding:18px 20px;margin-bottom:22px;">
