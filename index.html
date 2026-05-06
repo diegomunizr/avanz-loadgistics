@@ -148,7 +148,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255
 .empty-state p{font-size:14px;}
 .modal-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.active{display:flex;}
-.modal{background:var(--blanco);border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.2);animation:mUp .3s cubic-bezier(.34,1.56,.64,1);}
+.modal{background:var(--blanco);border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.2);animation:mUp .3s cubic-bezier(.34,1.56,.64,1);position:relative;}
 @keyframes mUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
 .modal-head{background:var(--naranja);padding:22px 28px;display:flex;align-items:center;justify-content:space-between;border-radius:13px 13px 0 0;}
 .modal-head h2{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--blanco);letter-spacing:1px;}
@@ -173,6 +173,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255
 .btn-submit{width:100%;background:var(--naranja);color:var(--blanco);padding:16px;border:none;border-radius:8px;font-family:'Barlow',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:all .2s;box-shadow:var(--sombra-naranja);}
 .btn-submit:hover{background:var(--naranja-dark);transform:translateY(-1px);box-shadow:0 10px 30px rgba(255,140,0,.35);}
 .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+/* ── Pantalla de progreso de subida ── */
+.upload-overlay{display:none;position:absolute;inset:0;z-index:10;background:rgba(255,255,255,0.97);border-radius:14px;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:40px;}
+.upload-overlay.active{display:flex;}
+.upload-spinner{width:52px;height:52px;border:4px solid var(--gris-linea);border-top-color:var(--naranja);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.upload-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--negro);letter-spacing:1px;text-align:center;}
+.upload-subtitle{font-size:13px;color:var(--gris-medio);text-align:center;max-width:300px;line-height:1.5;}
+.upload-bar-wrap{width:100%;max-width:320px;background:var(--gris-linea);border-radius:99px;height:8px;overflow:hidden;}
+.upload-bar{height:100%;background:var(--naranja);border-radius:99px;transition:width .4s ease;width:0%;}
+.upload-counter{font-size:12px;font-weight:700;color:var(--naranja-dark);letter-spacing:.5px;}
+.upload-warning{font-size:11px;color:var(--error);font-weight:700;text-align:center;background:rgba(220,38,38,.07);padding:8px 14px;border-radius:6px;}
 .toast{position:fixed;bottom:30px;right:30px;background:var(--blanco);border:1px solid var(--gris-linea);border-left:4px solid var(--exito);color:var(--negro);padding:16px 22px;border-radius:10px;z-index:3000;font-size:13px;box-shadow:var(--sombra-lg);transform:translateX(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:320px;}
 .toast.show{transform:translateX(0);}
 .t-title{font-weight:800;font-size:15px;margin-bottom:3px;color:var(--negro);}
@@ -406,7 +417,16 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
 <!-- MODAL: Alta Proveedor -->
 <div class="modal-overlay" id="modal-alta-proveedor">
   <div class="modal">
-    <div class="modal-head"><h2>🚚 Alta de Proveedor</h2><button class="mclose" onclick="closeModal('alta-proveedor')">✕</button></div>
+    <div class="modal-head"><h2>🚚 Alta de Proveedor</h2><button class="mclose" id="mclose-alta-proveedor" onclick="closeModal('alta-proveedor')">✕</button></div>
+    <!-- Pantalla de progreso — cubre el modal mientras suben los archivos -->
+    <div class="upload-overlay" id="upload-overlay-alta-proveedor">
+      <div class="upload-spinner"></div>
+      <div class="upload-title">Subiendo documentos...</div>
+      <div class="upload-bar-wrap"><div class="upload-bar" id="upload-bar-alta-proveedor"></div></div>
+      <div class="upload-counter" id="upload-counter-alta-proveedor">0 / 0 archivos</div>
+      <div class="upload-subtitle">Por favor <strong>no cierres esta ventana</strong> hasta que termine la carga.</div>
+      <div class="upload-warning">⚠️ Cerrar la página cancelará el envío</div>
+    </div>
     <div class="modal-body">
       <div style="background:var(--naranja-pale);border:1px solid rgba(255,140,0,.3);border-radius:10px;padding:18px 20px;margin-bottom:22px;">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--naranja-dark);margin-bottom:12px;">📋 Documentos requeridos para el alta</div>
@@ -800,31 +820,61 @@ function enviarDatos(obj, formId, form, btn, archivos) {
   db.push(localObj);
   saveDB(key, db);
 
-  // 2. Cerrar modal, limpiar UI y acumulador de archivos
-  closeModal(formId);
-  form.reset();
-  // Limpiar acumulador del área de archivos y re-renderizar lista vacía
-  if (_fileMap['prov']) { _fileMap['prov'] = []; }
-  document.querySelectorAll('.flist').forEach(el => el.innerHTML = '');
-  btn.disabled    = false;
-  btn.textContent = 'Enviar';
-  showToast('¡Solicitud recibida!', 'Nos pondremos en contacto contigo pronto.');
-  renderAll();
-
-  // 3. Nombre de carpeta con timestamp limpio
+  // 2. Nombre de carpeta con timestamp limpio
   const nombreBase    = obj.nombre || obj.empresa || 'Sin nombre';
   const ts            = timestampLimpio();
   const nombreCarpeta = nombreBase + ' — ' + ts;
 
-  // 4. Primero enviar los datos del formulario (JSONP — liviano)
+  // 3. Si hay archivos: mostrar overlay de progreso y NO cerrar el modal todavía
+  const overlay  = document.getElementById('upload-overlay-' + formId);
+  const bar      = document.getElementById('upload-bar-' + formId);
+  const counter  = document.getElementById('upload-counter-' + formId);
+  const mclosBtn = document.getElementById('mclose-' + formId);
+
+  if (archivos.length > 0 && overlay) {
+    // Bloquear el botón X del modal mientras sube
+    if (mclosBtn) mclosBtn.style.pointerEvents = 'none';
+    overlay.classList.add('active');
+    // Bloquear cierre accidental con back/refresh
+    window._uploadEnCurso = true;
+    window.onbeforeunload = function() {
+      return 'Tus documentos aún se están subiendo. ¿Seguro que quieres salir?';
+    };
+  }
+
+  // Función que limpia todo y cierra el modal al terminar
+  function finalizarEnvio() {
+    window._uploadEnCurso = false;
+    window.onbeforeunload = null;
+    if (overlay)  overlay.classList.remove('active');
+    if (mclosBtn) mclosBtn.style.pointerEvents = '';
+    closeModal(formId);
+    form.reset();
+    if (_fileMap['prov']) { _fileMap['prov'] = []; }
+    document.querySelectorAll('.flist').forEach(el => el.innerHTML = '');
+    btn.disabled    = false;
+    btn.textContent = 'Enviar';
+    showToast('¡Listo! Solicitud y documentos recibidos.', 'Nos pondremos en contacto contigo pronto.');
+    renderAll();
+  }
+
+  // 4. Enviar datos del formulario (JSONP — liviano, sin archivos)
   enviarJSONP(obj, function(resp) {
     if (!resp.ok) {
       console.warn('Error al enviar datos a Sheets:', resp.error);
+    }
+
+    // 5. Si no hay archivos, cerrar directo
+    if (archivos.length === 0) {
+      finalizarEnvio();
       return;
     }
 
-    // 5. Luego enviar cada archivo por POST
-    if (archivos.length === 0) return;
+    // 6. Subir archivos uno por uno con barra de progreso
+    let subidos = 0;
+    const total = archivos.length;
+    if (counter) counter.textContent = '0 / ' + total + ' archivos';
+    if (bar)     bar.style.width = '0%';
 
     archivos.reduce(function(promesa, archivo) {
       return promesa.then(function() {
@@ -838,11 +888,15 @@ function enviarDatos(obj, formId, form, btn, archivos) {
           enviarPost(payload, function(r) {
             if (!r.ok) console.warn('Error subiendo archivo:', archivo.name, r.error);
             else console.log('Archivo subido OK:', archivo.name);
+            subidos++;
+            const pct = Math.round((subidos / total) * 100);
+            if (bar)     bar.style.width = pct + '%';
+            if (counter) counter.textContent = subidos + ' / ' + total + ' archivos';
             resolve();
           });
         });
       });
-    }, Promise.resolve());
+    }, Promise.resolve()).then(finalizarEnvio);
   });
 }
 
