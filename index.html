@@ -450,8 +450,10 @@ footer{background:var(--negro);color:var(--blanco);padding:60px 60px 32px;}
           <div class="fgrp"><label>Número de unidades</label><input type="number" name="num_unidades" min="1" placeholder="Ej. 5"></div>
           <div class="fgrp"><label>Rutas de operación</label><input type="text" name="rutas" placeholder="MTY — CDMX — GDL"></div>
         </div>
-        <div class="fgrp"><label>Subir documentos requeridos *
-          <strong>Selecciona todos los archivos en una sola carga (los nuevos reemplazan los anteriores).</strong></label>
+        <div class="fgrp">
+          <label>Subir documentos requeridos *
+            <strong>Puedes hacer varias selecciones — los archivos se acumulan.</strong>
+          </label>
           <div class="file-drop" id="fdrop-prov">
             <input type="file" multiple accept=".pdf,.jpg,.png,.jpeg" onchange="handleFiles(this,'prov')">
             <div class="fd-icon">📎</div>
@@ -653,17 +655,48 @@ document.querySelectorAll('.modal-overlay').forEach(el => {
   });
 });
 
-// ─── ARCHIVOS ─────────────────────────────────────────────────────────────────
+// ─── ARCHIVOS — ACUMULADOR ────────────────────────────────────────────────────
+// Cada área ('prov', etc.) mantiene su propio array de archivos en memoria.
+// Selecciones sucesivas SE SUMAN, no se reemplazan.
+const _fileMap = {};
+
 function handleFiles(input, area) {
+  if (!_fileMap[area]) _fileMap[area] = [];
+
+  // Agregar los nuevos archivos; evitar duplicados exactos (mismo nombre + tamaño)
+  Array.from(input.files).forEach(function(f) {
+    const dup = _fileMap[area].some(function(ex) {
+      return ex.name === f.name && ex.size === f.size;
+    });
+    if (!dup) _fileMap[area].push(f);
+  });
+
+  // Limpiar el input para que el browser permita volver a seleccionar los mismos archivos
+  input.value = '';
+
+  renderFileList(area);
+}
+
+function renderFileList(area) {
   const list = document.getElementById('flist-' + area);
   if (!list) return;
   list.innerHTML = '';
-  Array.from(input.files).forEach(f => {
+  (_fileMap[area] || []).forEach(function(f, i) {
     const d = document.createElement('div');
     d.className = 'fitem';
-    d.textContent = '📄 ' + f.name + ' (' + (f.size / 1024).toFixed(0) + ' KB)';
+    d.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;';
+    d.innerHTML =
+      '<span>📄 ' + f.name + ' (' + (f.size / 1024).toFixed(0) + ' KB)</span>' +
+      '<span style="cursor:pointer;color:#bbb;font-size:13px;font-weight:700;padding:0 6px;flex-shrink:0;" ' +
+      'onclick="removeFile(\'' + area + '\',' + i + ')" title="Quitar archivo">✕</span>';
     list.appendChild(d);
   });
+}
+
+function removeFile(area, index) {
+  if (!_fileMap[area]) return;
+  _fileMap[area].splice(index, 1);
+  renderFileList(area);
 }
 
 // ─── TIMESTAMP LIMPIO (sin caracteres especiales) ────────────────────────────
@@ -701,7 +734,7 @@ function enviarJSONP(payload, callback) {
 function enviarPost(payload, callback) {
   fetch(SHEETS_URL, {
     method:  'POST',
-    headers: { 'Content-Type': 'text/plain' }, // evita preflight CORS
+    headers: { 'Content-Type': 'text/plain' },
     body:    JSON.stringify(payload)
   })
   .then(r => r.json())
@@ -728,17 +761,17 @@ function submitForm(e, formId) {
   };
   fd.forEach((v, k) => { if (!(v instanceof File)) obj[k] = v; });
 
-  const fileInput = form.querySelector('input[type="file"]');
-  const archivos  = (fileInput && fileInput.files.length > 0)
-    ? Array.from(fileInput.files) : [];
+  // Usar el acumulador _fileMap (no input.files, que solo tiene la última selección)
+  const archivos = (_fileMap['prov'] && _fileMap['prov'].length > 0)
+    ? _fileMap['prov'].slice()
+    : [];
 
   if (archivos.length === 0) {
-    // Sin archivos → enviar solo datos por JSONP
     enviarDatos(obj, formId, form, btn, []);
     return;
   }
 
-  // Leer todos los archivos como base64
+  // Leer todos los archivos acumulados como base64
   const leidos   = [];
   let pendientes = archivos.length;
   archivos.forEach(file => {
@@ -767,16 +800,18 @@ function enviarDatos(obj, formId, form, btn, archivos) {
   db.push(localObj);
   saveDB(key, db);
 
-  // 2. Cerrar modal y limpiar UI
+  // 2. Cerrar modal, limpiar UI y acumulador de archivos
   closeModal(formId);
   form.reset();
+  // Limpiar acumulador del área de archivos y re-renderizar lista vacía
+  if (_fileMap['prov']) { _fileMap['prov'] = []; }
   document.querySelectorAll('.flist').forEach(el => el.innerHTML = '');
   btn.disabled    = false;
   btn.textContent = 'Enviar';
   showToast('¡Solicitud recibida!', 'Nos pondremos en contacto contigo pronto.');
   renderAll();
 
-  // 3. Nombre de carpeta con timestamp limpio (sin caracteres problemáticos)
+  // 3. Nombre de carpeta con timestamp limpio
   const nombreBase    = obj.nombre || obj.empresa || 'Sin nombre';
   const ts            = timestampLimpio();
   const nombreCarpeta = nombreBase + ' — ' + ts;
@@ -788,7 +823,7 @@ function enviarDatos(obj, formId, form, btn, archivos) {
       return;
     }
 
-    // 5. Luego enviar cada archivo por POST (sin límite de URL)
+    // 5. Luego enviar cada archivo por POST
     if (archivos.length === 0) return;
 
     archivos.reduce(function(promesa, archivo) {
@@ -800,7 +835,6 @@ function enviarDatos(obj, formId, form, btn, archivos) {
             _nombre_carpeta: nombreCarpeta,
             _archivos:       JSON.stringify([archivo])
           };
-          // ✅ POST en lugar de JSONP — soporta archivos grandes
           enviarPost(payload, function(r) {
             if (!r.ok) console.warn('Error subiendo archivo:', archivo.name, r.error);
             else console.log('Archivo subido OK:', archivo.name);
